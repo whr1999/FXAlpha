@@ -1,0 +1,15 @@
+[Unit]
+Description=Run FXAlpha Tushare data-foundation daily update Tuesday through Saturday
+
+[Timer]
+OnCalendar=Tue..Sat *-*-* 02:00:00 Asia/Shanghai
+# A WSL/user-manager restart can interrupt an already-fired oneshot without
+# leaving a failed unit to restart.  Re-enter the idempotent routine shortly
+# after every manager start so an unfinished same-target package is resumed.
+OnStartupSec=5min
+Persistent=true
+AccuracySec=1min
+Unit=fxalpha-data-daily.service
+
+[Install]
+WantedBy=timers.target

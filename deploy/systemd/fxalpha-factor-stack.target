@@ -1,0 +1,7 @@
+[Unit]
+Description=FXAlpha factor-research local service stack
+Wants=fxalpha-quantgpt-8003.service fxalpha-api-18081.service
+After=fxalpha-quantgpt-8003.service fxalpha-api-18081.service
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,1455 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FXAlpha 平台控制台</title>
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("fxalpha.theme");
+        const theme = saved === "light" || saved === "dark"
+          ? saved
+          : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch (_error) {
+        document.documentElement.dataset.theme = "dark";
+        document.documentElement.style.colorScheme = "dark";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/gui/styles.css?v=20260809-paper-console-layout-v126" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">
+        <div class="brand-mark">FX</div>
+        <div class="brand-copy">
+          <p class="eyebrow brand-eyebrow"><span>Platform Console</span><span>平台控制台</span></p>
+          <div class="brand-title-row">
+            <h1>FXAlpha</h1>
+            <span class="evaluation-mode-indicator" id="evaluation-mode-indicator" role="status" aria-live="polite">
+              <span class="evaluation-mode-indicator-dot" aria-hidden="true"></span>
+              <strong>模式加载中</strong>
+            </span>
+          </div>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="打开平台模块菜单" aria-expanded="false" aria-controls="platform-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <nav class="nav" id="platform-nav">
+        <div class="nav-group-label">平台模块</div>
+        <button class="nav-item active" data-panel="overview" type="button">
+          <span>平台数据总览</span>
+          <small>首页 BI 看板、全链路状态</small>
+        </button>
+        <button class="nav-item" data-panel="research" data-workspace="run" type="button">
+          <span>因子研究</span>
+          <small>QuantGPT MCP 因子挖掘</small>
+        </button>
+        <button class="nav-item" data-panel="model-research" type="button">
+          <span>模型研究</span>
+          <small>模型训练与回测</small>
+        </button>
+        <button class="nav-item" data-panel="stock-research" type="button">
+          <span>个股研究</span>
+          <small>定性研究模块待建设</small>
+        </button>
+        <button class="nav-item" data-panel="trading" type="button">
+          <span>模拟交易</span>
+          <small>Qlib paper account</small>
+        </button>
+        <button class="nav-item" data-panel="library" type="button">
+          <span>因子库</span>
+          <small>Active 因子与质量指标</small>
+        </button>
+        <button class="nav-item" data-panel="model-library" type="button">
+          <span>模型库</span>
+          <small>模型资产与候选</small>
+        </button>
+        <button class="nav-item" data-panel="data-foundation" type="button">
+          <span>数据底座</span>
+            <small>Tushare 生产日更与 legacy 状态</small>
+        </button>
+      </nav>
+
+      <section class="rail-status">
+        <div class="rail-health-row">
+          <div class="status-chip" id="api-chip">API 未连接</div>
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换为浅色模式" title="切换界面主题">
+            <span class="theme-toggle-icon" aria-hidden="true"></span>
+            <span id="theme-toggle-label" hidden>深色模式</span>
+            <span class="theme-toggle-track" aria-hidden="true"><i></i></span>
+          </button>
+        </div>
+        <p class="rail-note" id="backend-note">等待后端状态…</p>
+        <div class="mini-metrics" id="mini-metrics"></div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="panel" id="panel-research">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">QuantGPT Factor Research Workbench</p>
+            <h2>因子研究监测控制台</h2>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost refresh-action" id="refresh-console" type="button">
+              <span>刷新状态</span>
+              <small>立即拉取最新状态</small>
+            </button>
+          </div>
+        </header>
+
+        <section class="summary-grid research-summary-hidden" id="research-summary"></section>
+        <section class="workspace-shell">
+          <aside class="workspace-nav">
+            <div class="workspace-nav-head">
+              <p class="eyebrow">Research Sections</p>
+              <h3>研究工作区</h3>
+            </div>
+            <div class="workspace-nav-list" id="research-workspace-nav"></div>
+          </aside>
+
+          <div class="workspace-content">
+            <section class="workspace-section" id="workspace-command">
+              <section class="single-workbench">
+                <article class="surface command-console-surface">
+                  <div class="section-head command-head">
+                    <div>
+                      <p class="eyebrow">Orchestrator Launch</p>
+                      <h3>研究指令台</h3>
+                    </div>
+                    <span class="section-hint">用少量关键输入启动后台 Orchestrator；保存默认配置需要显式点击。</span>
+                  </div>
+                  <section class="evaluation-mode-control" id="evaluation-mode-bar" aria-label="平台评估模式">
+                    <div class="evaluation-mode-copy">
+                      <p class="eyebrow">Evaluation Profile</p>
+                      <div><strong>平台默认模式加载中…</strong><span>仅影响新建任务</span></div>
+                    </div>
+                    <div class="evaluation-mode-switch" role="group" aria-label="切换平台默认评估模式">
+                      <button type="button" data-evaluation-mode="research">研究模式</button>
+                      <button type="button" data-evaluation-mode="production">生产模式</button>
+                    </div>
+                  </section>
+                  <form id="orchestrator-command-form" class="command-console-form">
+                    <section class="command-execution-panel" aria-label="研究启动控制">
+                      <div class="command-execution-head">
+                        <div class="command-block-head">
+                          <div>
+                            <h3>当前状态与运行控制</h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="command-preflight-strip" id="command-preflight-strip"></div>
+                      <div class="command-control-note" id="command-control-note"></div>
+                      <div class="command-llm-model-control" aria-label="DeepSeek 首选模型">
+                        <div class="command-llm-model-copy">
+                          <span class="command-llm-model-label">DeepSeek 模型</span>
+                          <small id="command-llm-model-note">仅影响新建 ORCH 任务</small>
+                        </div>
+                        <div class="command-llm-model-switch" role="radiogroup" aria-label="选择新研究使用的 DeepSeek 首选模型">
+                          <button type="button" data-command-llm-model="deepseek-v4-pro" role="radio" aria-checked="true">V4 Pro</button>
+                          <button type="button" data-command-llm-model="deepseek-v4-flash" role="radio" aria-checked="false">V4 Flash</button>
+                        </div>
+                        <input name="llm_model" type="hidden" value="deepseek-v4-pro" />
+                      </div>
+                      <div class="command-message" id="command-message" hidden></div>
+                      <div class="command-action-board">
+                        <div class="command-action-section">
+                          <span class="command-action-label">运行操作</span>
+                          <div class="form-actions command-actions command-lifecycle-actions">
+                            <button class="primary" type="submit" id="command-start-orchestrator">启动新研究</button>
+                            <button class="ghost" type="button" id="command-pause-orchestrator">暂停研究</button>
+                            <button class="ghost" type="button" id="command-resume-orchestrator">继续研究</button>
+                            <button class="ghost danger-action" type="button" id="command-stop-orchestrator">停止本次研究</button>
+                          </div>
+                        </div>
+                        <div class="command-action-section command-support-section">
+                          <span class="command-action-label">辅助操作</span>
+                          <div class="form-actions command-actions command-support-actions">
+                            <button class="ghost" type="button" id="command-open-run">查看研究现场</button>
+                            <button class="ghost" type="button" id="command-open-guidance">定位研究干预</button>
+                            <button class="ghost" type="button" id="command-save-defaults">保存为默认配置</button>
+                            <button class="ghost" type="button" id="command-refresh-preflight">刷新预检</button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <div class="command-main-grid">
+                      <section class="command-config-card command-objective-card">
+                        <div class="command-block-head">
+                          <div>
+                            <h3>本次研究目标</h3>
+                          </div>
+                          <small>写清想研究的经济现象、希望避开的旧方向；填写 auto 时由 ORCH 自主选题。</small>
+                        </div>
+                        <label class="field command-direction">
+                          <span>研究指令</span>
+                          <textarea name="direction" rows="5" placeholder="例如：围绕盈利预期修复和资金承接挖掘新因子，避开 active pool 已有低估值慢变量。">auto</textarea>
+                        </label>
+                      </section>
+
+                      <section class="command-config-card command-budget-card">
+                        <div class="command-block-head">
+                          <div>
+                            <h3>研究目标与预算</h3>
+                          </div>
+                          <small>候选数是上限，不要求模型每轮凑满。</small>
+                        </div>
+                        <div class="command-budget-grid">
+                          <label class="field">
+                            <span>目标入库</span>
+                            <input name="target_adopted" type="number" min="1" value="10" />
+                            <small>达到目标后结束</small>
+                          </label>
+                          <label class="field">
+                            <span>每轮最多候选</span>
+                            <input name="n_candidates" type="number" min="1" max="10" value="10" />
+                            <small>允许少于上限</small>
+                          </label>
+                          <label class="field">
+                            <span>最大轮次</span>
+                            <input name="n_rounds" type="number" min="0" value="0" />
+                            <small>0 表示自动</small>
+                          </label>
+                        </div>
+                      </section>
+                    </div>
+
+                    <section class="command-config-card command-scope-card">
+                      <div class="command-block-head">
+                        <div>
+                          <h3>数据范围与评分口径</h3>
+                        </div>
+                        <small>默认值来自生产配置；这里只影响下一次启动。</small>
+                      </div>
+                      <div class="command-param-grid">
+                        <label class="field command-field-primary">
+                          <span>股票池</span>
+                          <select name="universe">
+                            <option value="tradable_non_st" selected>动态无 ST tradable_non_st（生产默认）</option>
+                            <option value="all_market">全市场 all_market（诊断/遗留对比）</option>
+                            <option value="hs300">沪深300 hs300</option>
+                            <option value="csi500">中证500 csi500</option>
+                            <option value="csi1000">中证1000 csi1000</option>
+                            <option value="csi2000">中证2000 csi2000</option>
+                          </select>
+                        </label>
+                        <label class="field command-field-primary">
+                          <span>基准</span>
+                          <select name="benchmark">
+                            <option value="hs300">沪深300 hs300</option>
+                            <option value="csi500">中证500 csi500</option>
+                            <option value="zz500">中证500 zz500</option>
+                            <option value="csi1000">中证1000 csi1000</option>
+                          </select>
+                        </label>
+                        <label class="field">
+                          <span>评估开始日期（随模式）</span>
+                          <input name="start_date" type="date" readonly />
+                        </label>
+                        <label class="field">
+                          <span>评估结束日期（随模式）</span>
+                          <input name="end_date" type="date" readonly />
+                        </label>
+                        <label class="field">
+                          <span>持有期（交易日）</span>
+                          <input name="holding_period" type="number" min="1" value="5" />
+                        </label>
+                        <label class="field">
+                          <span>Top 分组比例</span>
+                          <input name="top_frac" type="number" min="0.01" max="1" step="0.01" value="0.2" />
+                        </label>
+                        <label class="field">
+                          <span>回测交易成本率</span>
+                          <input name="cost_rate" type="number" min="0" max="0.05" step="0.0001" value="0.003" />
+                        </label>
+                      </div>
+
+                      <div class="command-toggle-row">
+                        <label class="checkbox-row">
+                          <input name="neutralize_cap" type="checkbox" checked />
+                          <span>市值中性化</span>
+                        </label>
+                        <label class="checkbox-row">
+                          <input name="submit_wq" type="checkbox" />
+                          <span>同步 WQ</span>
+                        </label>
+                      </div>
+                    </section>
+                  </form>
+
+                  <section class="command-config-card command-guidance-card" id="command-guidance" aria-label="研究干预与模型回执">
+                    <div class="command-block-head">
+                      <div>
+                        <h3>研究干预与模型回执</h3>
+                      </div>
+                    </div>
+                    <div class="command-guidance-layout">
+                      <div class="command-guidance-compose">
+                        <div class="guidance-presets" id="guidance-presets"></div>
+                        <form id="guidance-form" class="guidance-form command-guidance-form">
+                          <textarea id="guidance-input" maxlength="500" aria-label="研究干预意见" placeholder="例如：这个方向太偏量价了，请增加质量或估值锚点，并避免只做窗口微调。"></textarea>
+                          <div class="form-actions command-guidance-actions">
+                            <button class="primary" type="submit">发送给当前 ORCH</button>
+                            <span class="inline-note" id="guidance-note">当前没有可接收干预的 run；单条最多 500 字。</span>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="command-guidance-impact">
+                        <div class="command-guidance-impact-head">
+                          <strong>一次性干预状态</strong>
+                          <span>待执行 + 最近结果</span>
+                        </div>
+                        <div class="guidance-impact-list" id="guidance-history"></div>
+                      </div>
+                    </div>
+                  </section>
+                </article>
+              </section>
+            </section>
+
+            <section class="workspace-section active" id="workspace-run">
+              <div class="workbench-grid single-workbench">
+                <article class="surface surface-status">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Live · 实时</p>
+                      <h3>研究现场</h3>
+                    </div>
+                    <span class="section-hint">当前进展、工具轨道和候选结果集中展示。</span>
+                  </div>
+                  <div class="research-config-strip" id="research-config-strip"></div>
+                  <div class="compact-system-strip" id="compact-system-strip"></div>
+                  <div class="research-progress-board" id="research-progress-board"></div>
+                  <div class="research-live-desk" id="research-live-desk"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="workspace-section" id="workspace-candidates">
+              <section class="single-workbench candidate-workspace-layout">
+                <article class="surface candidate-board-surface">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Candidate Results</p>
+                      <h3>候选因子实时榜</h3>
+                    </div>
+                    <span class="section-hint">独立展示候选评分、质量门和详情，不占用研究现场主流程。</span>
+                  </div>
+                  <div class="live-candidate-table" id="live-candidate-table"></div>
+                  <div class="live-candidate-best" id="live-candidate-best"></div>
+                </article>
+                <div id="inspector-detail" class="detail-block live-inspector-detail inspector-detail"></div>
+              </section>
+            </section>
+
+            <section class="workspace-section" id="workspace-knowledge">
+              <section class="single-workbench">
+                <article class="surface factor-map-surface">
+                  <div id="factor-map-board" class="factor-map-board"></div>
+                </article>
+              </section>
+            </section>
+
+            <section class="workspace-section" id="workspace-orch-trace">
+              <section class="single-workbench">
+                <article class="surface orch-trace-surface">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Orchestrator Trace</p>
+                      <h3>Orch Trace</h3>
+                    </div>
+                    <span class="section-hint">DeepSeek LLM trace、Orchestrator event 与 research_step 交叉监督。</span>
+                  </div>
+                  <div id="orch-trace-board" class="orch-trace-board"></div>
+                </article>
+              </section>
+            </section>
+
+            <section class="workspace-section" id="workspace-settings">
+              <article class="surface surface-form">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Launch · 启动</p>
+                    <h3>研究设置</h3>
+                  </div>
+                  <span class="section-hint">配置研究窗口、股票池、候选规模和交接参数。</span>
+                </div>
+
+                <form id="research-form" class="form-grid">
+                  <label class="field field-span-2">
+                    <span>研究方向 / Prompt</span>
+                    <textarea name="direction" rows="4" placeholder="填 auto 自动选方向，或手动输入你希望的研究方向。">auto</textarea>
+                  </label>
+
+                  <label class="field">
+                    <span>目标入库因子数</span>
+                    <input name="target_adopted" type="number" value="20" min="1" />
+                  </label>
+                  <label class="field">
+                    <span>股票池 Universe</span>
+                    <select name="universe">
+                      <option value="tradable_non_st" selected>动态无 ST tradable_non_st（生产默认）</option>
+                      <option value="all_market">全市场 all_market（诊断/遗留对比）</option>
+                      <option value="hs300">沪深300 hs300</option>
+                      <option value="csi500">中证500 csi500</option>
+                      <option value="csi1000">中证1000 csi1000</option>
+                      <option value="csi2000">中证2000 csi2000</option>
+                    </select>
+                  </label>
+
+                  <label class="field">
+                    <span>开始日期（随模式）</span>
+                    <input name="start_date" type="date" value="" readonly />
+                  </label>
+                  <label class="field">
+                    <span>结束日期（随模式）</span>
+                    <input name="end_date" type="date" value="" readonly />
+                  </label>
+
+                  <label class="field">
+                    <span>基准 Benchmark</span>
+                    <input name="benchmark" type="text" value="" placeholder="runtime default" />
+                  </label>
+                  <label class="field">
+                    <span>持有周期（天）</span>
+                    <input name="holding_period" type="number" value="" min="1" placeholder="runtime default" />
+                  </label>
+                  <label class="field">
+                    <span>分组数量 N Groups</span>
+                    <input name="n_groups" type="number" value="5" min="2" max="20" />
+                  </label>
+                  <label class="field">
+                    <span>Long-only Top Fraction</span>
+                    <input name="top_frac" type="number" value="0.2" min="0.01" max="1" step="0.01" />
+                  </label>
+                  <label class="field">
+                    <span>Transaction Cost Rate</span>
+                    <input name="cost_rate" type="number" value="0.003" min="0" max="0.05" step="0.0001" />
+                  </label>
+                  <label class="field">
+                    <span>Rebalance Anchor</span>
+                    <input name="rebalance_anchor" type="date" />
+                  </label>
+                  <label class="field">
+                    <span>Universe Date</span>
+                    <input name="universe_date" type="date" />
+                  </label>
+
+                  <label class="checkbox-row field-span-2">
+                    <input name="submit_wq" type="checkbox" />
+                    <span>将通过的因子同步提交到 WorldQuant Brain</span>
+                  </label>
+                  <label class="checkbox-row field-span-2">
+                    <input name="neutralize_cap" type="checkbox" checked />
+                    <span>启用市值中性化（默认开启；IC/RankIC 与分组均使用中性化后的有效因子值）</span>
+                  </label>
+
+                  <details class="run-options field-span-2">
+                    <summary>研究运行参数</summary>
+                    <div class="info-strip">
+                      这些参数由默认生产 ORCH 读取并写入 research_steps；显式 MCP 调试模式复用同一份参数和质量规则。
+                    </div>
+                    <div class="form-grid embedded-grid">
+                      <label class="field">
+                        <span>每轮候选数</span>
+                        <input name="n_candidates" type="number" value="10" min="1" />
+                      </label>
+                      <label class="field">
+                        <span>建议轮数</span>
+                        <input name="n_rounds" type="number" value="4" min="0" />
+                      </label>
+                      <label class="field">
+                        <span>Seed 数量</span>
+                        <input name="seed_count" type="number" value="3" min="1" />
+                      </label>
+                      <label class="field">
+                        <span>Seed 并发数</span>
+                        <input name="seed_max_concurrent" type="number" value="3" min="1" />
+                      </label>
+                      <label class="field">
+                        <span>最大换方向次数</span>
+                        <input name="max_direction_attempts" type="number" value="3" min="1" />
+                      </label>
+                      <label class="field">
+                        <span>最大停滞轮数</span>
+                        <input name="max_stagnation_rounds" type="number" value="3" min="1" />
+                      </label>
+                      <label class="field">
+                        <span>自动会话数</span>
+                        <input name="auto_sessions" type="number" value="1" min="1" />
+                      </label>
+                    </div>
+                  </details>
+
+                  <details class="legacy-llm-options field-span-2">
+                    <summary>高级编排选项</summary>
+                    <div class="warning-strip">
+                      默认生产路径是 ORCH。Codex native MCP 保留为人工逐步调试、故障定位和证据复核入口，不归档、不删除，也不建立第二套质量标准。
+                    </div>
+                    <label class="field">
+                      <span>研究编排模式</span>
+                      <select name="orchestration_mode">
+                        <option value="orchestrator" selected>ORCH（默认生产）</option>
+                        <option value="codex_mcp">Codex native MCP（人工调试/复核）</option>
+                      </select>
+                    </label>
+                    <div class="form-grid embedded-grid">
+                      <label class="field">
+                        <span>兼容 Seed 批量轮次</span>
+                        <input name="seed_batch_rounds" type="number" value="0" min="0" />
+                      </label>
+                      <label class="field">
+                        <span>兼容 Seed 批量最大候选数</span>
+                        <input name="seed_batch_max_candidates" type="number" value="0" min="0" />
+                      </label>
+                    </div>
+                  </details>
+
+                  <div class="form-actions field-span-2">
+                    <button class="primary" type="submit">同步到研究指令台</button>
+                    <button class="ghost" type="button" id="load-auto-template">载入推荐参数</button>
+                  </div>
+                </form>
+              </article>
+            </section>
+
+            <section class="workspace-section" id="workspace-notes">
+              <section class="dual-surface workspace-detail-grid">
+                <article class="surface">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Research Notes</p>
+                      <h3>最新研究摘要</h3>
+                    </div>
+                    <span class="section-hint">只保留归档研究笔记；实时研究摘要已经统一放在“研究现场”。</span>
+                  </div>
+                  <div id="recent-notes" class="notes-list"></div>
+                </article>
+              </section>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel active" id="panel-overview">
+        <header class="hero compact overview-hero">
+          <div class="overview-hero-main">
+            <p class="eyebrow">Platform Command Center</p>
+            <h2>平台驾驶舱</h2>
+            <p class="hero-copy">汇总数据、因子、模型、交易和运行资源。</p>
+          </div>
+          <div class="overview-hero-side">
+            <div id="overview-hero-status" class="overview-hero-status">
+              <span class="overview-status-badge is-warn">读取中</span>
+              <span>正在汇总平台状态</span>
+            </div>
+            <button class="ghost" id="refresh-overview" type="button">刷新总览</button>
+          </div>
+        </header>
+
+        <section class="overview-command-center">
+          <article class="surface system-status-rail" id="overview-system-rail">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">System Status</p>
+                <h3>系统状态</h3>
+              </div>
+            </div>
+            <div class="runtime-fallback-card">
+              <span class="detail-label">运行指标</span>
+              <strong>正在读取状态</strong>
+              <p>平台总览正在聚合 API、数据、研究、模型与交易状态。</p>
+            </div>
+          </article>
+          <div id="overview-paper-highlight" class="overview-paper-highlight">
+            <button class="module-cockpit-card variant-featured is-idle" type="button"><span class="status-dot"></span><strong>模拟交易读取中</strong></button>
+          </div>
+          <article class="surface background-workflow-panel overview-background-workflows">
+            <div class="section-head compact">
+              <div><p class="eyebrow">Background Workflows</p><h3>后台定时流程</h3></div>
+              <span class="section-hint">WSL user systemd</span>
+            </div>
+            <div id="overview-background-workflow-status" class="background-workflow-grid"></div>
+          </article>
+          <div id="overview-module-matrix" class="overview-module-matrix">
+            <button class="module-cockpit-card is-idle" type="button"><span class="status-dot"></span><strong>正在汇总模块状态</strong></button>
+          </div>
+          <article class="surface usage-panel">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">LLM Usage</p>
+                <h3>额度与消耗</h3>
+              </div>
+            </div>
+            <div id="overview-usage-panel" class="usage-meter-list">
+              <article class="usage-meter is-idle">
+                <div class="usage-meter-head"><span class="detail-label">Codex / DeepSeek</span><strong>读取中</strong></div>
+                <p>官方额度和本机观测会分开标注。</p>
+              </article>
+            </div>
+          </article>
+          <article class="surface action-queue-panel">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Next Actions</p>
+                <h3>下一步与风险</h3>
+              </div>
+            </div>
+            <div id="overview-action-queue" class="action-queue">
+              <button class="action-item is-warn" type="button"><span></span><strong>正在生成行动队列</strong><small>读取完成后展示最需要处理的 3-5 项。</small></button>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-model-research">
+        <header class="hero compact">
+          <div>
+            <p class="eyebrow">Model Research</p>
+            <h2>模型研究</h2>
+            <p class="hero-copy">聚焦当前模型训练流程、研究进展、候选模型、回测和生产资产，研究态与资产态分开展示。</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost" id="refresh-model-research" type="button">刷新模型状态</button>
+          </div>
+        </header>
+        <section class="summary-grid" id="model-research-summary"></section>
+        <section class="workspace-shell model-workspace-shell">
+          <aside class="workspace-nav model-workspace-nav">
+            <div class="workspace-nav-head">
+              <p class="eyebrow">Model Sections</p>
+              <h3>模型工作区</h3>
+            </div>
+            <div class="workspace-nav-list">
+              <button class="workspace-tab model-workspace-tab active" data-model-workspace="command" type="button">
+                <span>研究指令台</span>
+                <small>配置模型研究参数并启动 ORCH</small>
+              </button>
+              <button class="workspace-tab model-workspace-tab" data-model-workspace="live" type="button">
+                <span>研究现场</span>
+                <small>流程进度、研究进展、运行证据</small>
+              </button>
+              <button class="workspace-tab model-workspace-tab" data-model-workspace="orch-trace" type="button">
+                <span>研究日志</span>
+                <small>DeepSeek 请求返回、工具提交、上下文</small>
+              </button>
+              <button class="workspace-tab model-workspace-tab" data-model-workspace="backtest" type="button">
+                <span>回测结果</span>
+                <small>完成模型指标、曲线、贡献解释</small>
+              </button>
+              <button class="workspace-tab model-workspace-tab" data-model-workspace="guidance" type="button">
+                <span>人工干预</span>
+                <small>记录下一轮研究指导</small>
+              </button>
+              <button class="workspace-tab model-workspace-tab" data-model-workspace="records" type="button">
+                <span>模型库</span>
+                <small>Production、候选、风险标签</small>
+              </button>
+            </div>
+          </aside>
+          <div class="workspace-content">
+            <section class="model-workspace-section active" id="model-workspace-command">
+              <article class="surface model-command-surface">
+                <div class="section-head model-command-head">
+                  <div>
+                    <p class="eyebrow">Orchestrator Launch</p>
+                    <h3>研究指令台</h3>
+                  </div>
+                  <span class="section-hint">配置模型研究的真实启动参数；研究模式与生产 Rolling 分开启动。</span>
+                </div>
+                <div class="model-command-overview">
+                  <section class="model-command-mode-control" aria-label="模型评估模式">
+                    <div>
+                      <p class="eyebrow">Evaluation Mode</p>
+                      <strong id="model-command-mode-title">研究模式</strong>
+                      <span id="model-command-mode-note">选择研究对象、研究方案与基线参数，再执行预检。</span>
+                    </div>
+                    <div class="evaluation-mode-switch model-evaluation-mode-switch" role="group" aria-label="切换模型研究模式">
+                      <button class="is-active" type="button" data-model-evaluation-mode="research" aria-pressed="true">研究模式</button>
+                      <button type="button" data-model-evaluation-mode="production" aria-pressed="false">生产模式</button>
+                    </div>
+                  </section>
+                  <section class="model-command-readiness" id="model-command-status-strip" aria-label="模型研究启动预检"></section>
+                </div>
+                <div class="command-control-note" id="model-command-control-note"></div>
+                <div class="command-message" id="model-action-result" hidden></div>
+                <form id="model-command-form" class="model-command-form">
+                  <input name="evaluation_mode" type="hidden" value="research" />
+                  <div class="model-command-pane" data-model-mode-pane="research">
+                    <div class="model-research-builder">
+                      <section class="model-command-step-card model-feature-builder-card">
+                        <div class="model-command-step-head">
+                          <span>01</span>
+                          <div><p class="eyebrow">Research Target</p><h3>选择研究因子</h3></div>
+                          <small>所有选择都来自因子库与最近一次信息簇审计。</small>
+                        </div>
+                        <div class="model-feature-audit-bridge">
+                          <div class="model-feature-audit-status" id="model-feature-audit-status">
+                            <span class="status-dot"></span>
+                            <div><small>Factor Library Audit</small><strong>正在读取因子库审计</strong><span>Feature Set 与自定义因子列表会跟随审计结果更新。</span></div>
+                          </div>
+                          <div class="model-feature-audit-actions">
+                            <button class="ghost" type="button" data-panel-target="library">打开因子库</button>
+                            <button class="ghost" id="model-refresh-factor-audit" type="button">刷新信息簇审计</button>
+                          </div>
+                        </div>
+                        <input name="feature_set_id" type="hidden" value="" />
+                        <div class="model-feature-source-switch" role="group" aria-label="Feature Set 来源">
+                          <button class="is-active" type="button" data-model-feature-source="catalog"><strong>使用已冻结组合</strong><small>直接选择可复现的 Feature Set</small></button>
+                          <button type="button" data-model-feature-source="custom"><strong>新建因子组合</strong><small>从 Active 因子库勾选并冻结</small></button>
+                        </div>
+                        <div class="model-feature-source-pane" data-model-feature-source-pane="catalog">
+                          <label class="field">
+                            <span>Feature Set</span>
+                            <select id="model-feature-set-select" aria-label="选择 Feature Set">
+                              <option value="">正在读取 Feature Set 目录...</option>
+                            </select>
+                          </label>
+                          <div class="model-feature-preset-grid" id="model-feature-set-presets"></div>
+                          <div class="model-feature-selection-summary" id="model-feature-set-summary"></div>
+                        </div>
+                        <div class="model-feature-source-pane" data-model-feature-source-pane="custom" hidden>
+                          <div class="model-factor-toolbar">
+                            <label class="field"><span>搜索因子</span><input id="model-factor-search" type="search" aria-label="搜索因子" placeholder="因子名称 / ID / 表达式" autocomplete="off" /></label>
+                            <label class="field"><span>因子分类</span><select id="model-factor-category" aria-label="因子分类"><option value="all">全部分类</option></select></label>
+                          </div>
+                          <div class="model-audit-recommendations" id="model-factor-recommendations"></div>
+                          <div class="model-factor-picker-head">
+                            <span id="model-factor-selection-count">已选 0 个</span>
+                            <div><button class="tiny-button" id="model-factor-select-visible" type="button">选择当前结果</button><button class="tiny-button" id="model-factor-clear" type="button">清空</button></div>
+                          </div>
+                          <div class="model-factor-picker" id="model-factor-picker"></div>
+                          <div class="model-factor-freeze-bar">
+                            <div><strong>冻结为不可变 Feature Set</strong><span id="model-factor-audit-note">创建后才会进入训练预检，不会改写 Active 因子库。</span></div>
+                            <button class="primary" id="freeze-model-feature-set" type="button" disabled>创建 Feature Set</button>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section class="model-command-step-card model-protocol-card">
+                        <div class="model-command-step-head">
+                          <span>02</span>
+                          <div><p class="eyebrow">Research Plan</p><h3>选择研究方案</h3></div>
+                          <small>方案只改变研究执行深度，不改变平台证据合同。</small>
+                        </div>
+                        <div class="model-protocol-preset-grid">
+                          <button class="model-protocol-preset is-active" type="button" data-model-protocol-preset="complete"><strong>完整研究</strong><span>Round 0 + 3 轮 ORCH，训练并写入研究库</span></button>
+                          <button class="model-protocol-preset" type="button" data-model-protocol-preset="screen"><strong>快速筛选</strong><span>Round 0 + 1 轮，只到研究评分</span></button>
+                          <button class="model-protocol-preset" type="button" data-model-protocol-preset="plan"><strong>仅生成计划</strong><span>不训练、不写 Registry</span></button>
+                        </div>
+                        <div class="model-command-param-grid">
+                          <label class="field">
+                            <span>ORCH 调参轮次</span>
+                            <input name="model_orch_rounds" type="number" min="0" max="12" value="3" />
+                            <small>另自动执行 Round 0；填 0 时只跑当前基线。</small>
+                          </label>
+                          <label class="field">
+                            <span>运行至阶段</span>
+                            <select name="max_stage">
+                              <option value="round_synthesis" selected>完整研究 · Round Synthesis</option>
+                              <option value="research_score">研究评分 · Research Score</option>
+                              <option value="train_backtest_seed42">Seed42 训练回测</option>
+                              <option value="experiment_plan">实验计划 · 不训练</option>
+                            </select>
+                          </label>
+                        </div>
+                        <div class="model-command-toggle-grid">
+                          <label class="checkbox-row"><input name="execute_qlib" type="checkbox" checked /><span><b>执行真实训练</b><small>调用 qlib0627 训练与回测</small></span></label>
+                          <label class="checkbox-row"><input name="write_registry" type="checkbox" checked /><span><b>保留研究证据</b><small>通过 Gate 后写入 Research Registry</small></span></label>
+                        </div>
+                        <details class="model-governed-contract">
+                          <summary>查看平台锁定的证据协议 <span>标签、Seed、组合、处理器</span></summary>
+                          <div class="model-command-contract-grid" id="model-command-contract"></div>
+                          <p>这些项目决定不同实验是否可比较，研究指令台不允许单次任务绕过；可调研究项与模型参数均会真实写入 Round 0。</p>
+                        </details>
+                      </section>
+
+                      <details class="model-command-hyper-card">
+                      <summary>
+                        <div><p class="eyebrow">03 · Qlib / LightGBM</p><h3>基线模型参数</h3></div>
+                        <span>12 项可调 · 有界校验</span>
+                      </summary>
+                      <div class="model-command-preset-bar">
+                        <span>参数预设</span>
+                        <button class="tiny-button is-active" type="button" data-model-param-preset="fxalpha">FXAlpha 默认</button>
+                        <button class="tiny-button" type="button" data-model-param-preset="qlib">Qlib Alpha158</button>
+                        <button class="tiny-button" type="button" id="model-command-reset-defaults">重置当前默认</button>
+                      </div>
+                      <div class="model-hyperparam-groups">
+                        <section>
+                          <h4>学习与树容量</h4>
+                          <div class="model-hyperparam-grid">
+                            <label class="field"><span>learning_rate</span><input name="baseline_learning_rate" data-model-param="learning_rate" type="number" min="0.005" max="0.30" step="any" value="0.04" /></label>
+                            <label class="field"><span>n_estimators</span><input name="baseline_n_estimators" data-model-param="n_estimators" type="number" min="500" max="5000" step="100" value="2400" /></label>
+                            <label class="field"><span>early_stopping_rounds</span><input name="baseline_early_stopping_rounds" data-model-param="early_stopping_rounds" type="number" min="30" max="300" step="10" value="100" /></label>
+                            <label class="field"><span>num_leaves</span><input name="baseline_num_leaves" data-model-param="num_leaves" type="number" min="16" max="256" step="1" value="96" /></label>
+                            <label class="field"><span>max_depth</span><input name="baseline_max_depth" data-model-param="max_depth" type="number" min="4" max="12" step="1" value="8" /></label>
+                            <label class="field"><span>min_data_in_leaf</span><input name="baseline_min_data_in_leaf" data-model-param="min_data_in_leaf" type="number" min="5" max="200" step="1" value="10" /></label>
+                          </div>
+                        </section>
+                        <section>
+                          <h4>采样与正则化</h4>
+                          <div class="model-hyperparam-grid">
+                            <label class="field"><span>feature_fraction</span><input name="baseline_feature_fraction" data-model-param="feature_fraction" type="number" min="0.60" max="1" step="any" value="0.9" /></label>
+                            <label class="field"><span>bagging_fraction</span><input name="baseline_bagging_fraction" data-model-param="bagging_fraction" type="number" min="0.50" max="1" step="any" value="0.9" /></label>
+                            <label class="field"><span>bagging_freq</span><input name="baseline_bagging_freq" data-model-param="bagging_freq" type="number" min="0" max="20" step="1" value="1" /></label>
+                            <label class="field"><span>lambda_l1</span><input name="baseline_lambda_l1" data-model-param="lambda_l1" type="number" min="0" max="300" step="any" value="20" /></label>
+                            <label class="field"><span>lambda_l2</span><input name="baseline_lambda_l2" data-model-param="lambda_l2" type="number" min="0" max="600" step="any" value="50" /></label>
+                            <label class="field"><span>bin_construct_sample_cnt</span><input name="baseline_bin_construct_sample_cnt" data-model-param="bin_construct_sample_cnt" type="number" min="100000" max="10000000" step="100000" value="5000000" /></label>
+                          </div>
+                        </section>
+                      </div>
+                      <div class="model-fixed-param-note"><strong>固定项</strong><span>loss=mse · boosting_type=gbdt · runtime threads=1 · Seed 由 42/17/83 协议控制</span></div>
+                      </details>
+                    </div>
+                    <aside class="model-launch-review-card">
+                      <div><p class="eyebrow">Launch Review</p><h3>启动核对</h3></div>
+                      <div id="model-launch-review" class="model-launch-review"></div>
+                      <div class="form-actions model-command-actions">
+                        <button class="primary" type="button" id="start-model-orch">启动新研究</button>
+                        <button class="ghost" type="button" id="stop-model-orch">停止当前训练</button>
+                        <button class="ghost" type="button" id="resume-model-orch">继续上次训练</button>
+                        <button class="ghost" type="button" id="refresh-model-command">刷新预检</button>
+                      </div>
+                    </aside>
+                  </div>
+                  <div class="model-command-pane" data-model-mode-pane="production" hidden>
+                    <section class="model-command-config-card model-production-command-card">
+                      <div class="command-block-head">
+                        <div><h3>Production Rolling 参数</h3></div>
+                        <small>只接受已通过研究确认的来源轮次，模型参数从该轮不可变继承。</small>
+                      </div>
+                      <label class="field">
+                        <span>来源研究轮次</span>
+                        <select name="source_round_group_id" id="model-production-source-round" aria-label="来源研究轮次">
+                          <option value="">请选择已通过 Seed17/83 确认的研究轮次</option>
+                        </select>
+                      </label>
+                      <label class="checkbox-row">
+                        <input name="production_write_registry" type="checkbox" checked />
+                        <span>Rolling 达标后写入 Candidate Registry</span>
+                      </label>
+                    </section>
+                    <aside class="model-command-contract-card">
+                      <div class="command-block-head"><div><h3>生产模式约束</h3></div></div>
+                      <div class="model-command-contract-grid" id="model-production-contract"></div>
+                      <p>Production Rolling 固定来源参数并执行四折验证；这里不会把研究页填写的超参数偷偷带入生产证据。</p>
+                    </aside>
+                    <aside class="model-launch-review-card model-production-launch-card">
+                      <div><p class="eyebrow">Launch Review</p><h3>生产启动核对</h3></div>
+                      <div id="model-production-launch-review" class="model-launch-review"></div>
+                      <div class="form-actions model-command-actions">
+                        <button class="primary" type="button" id="start-model-production-orch">启动 Production Rolling</button>
+                        <button class="ghost" type="button" id="refresh-model-production-command">刷新生产来源</button>
+                      </div>
+                    </aside>
+                  </div>
+                </form>
+              </article>
+            </section>
+            <section class="model-workspace-section" id="model-workspace-live">
+              <article class="surface">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Live · 运行态</p>
+                    <h3>研究现场</h3>
+                  </div>
+                  <span class="section-hint">这里只显示运行过程，不展示最终回测结论。</span>
+                </div>
+                <div id="model-runtime-detail" class="detail-block"></div>
+              </article>
+            </section>
+            <section class="model-workspace-section" id="model-workspace-orch-trace">
+              <article class="surface orch-trace-surface">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Model Research · Logs</p>
+                    <h3>研究日志</h3>
+                  </div>
+                  <span class="section-hint">复盘大模型输入、响应、参数理由与平台执行回执。</span>
+                </div>
+                <div id="model-orch-trace-detail" class="detail-block"></div>
+              </article>
+            </section>
+            <section class="model-workspace-section" id="model-workspace-backtest">
+              <article class="surface">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Backtest · 完成态</p>
+                    <h3>模型回测结果</h3>
+                  </div>
+                  <span class="section-hint">只展示已完成模型；主评价以 Qlib 风险分析指标为准。</span>
+                </div>
+                <div id="model-backtest-detail" class="detail-block"></div>
+              </article>
+            </section>
+            <section class="model-workspace-section" id="model-workspace-guidance">
+              <article class="surface surface-form">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Guidance · 干预</p>
+                    <h3>模型研究人工意见</h3>
+                  </div>
+                  <span class="section-hint">这里只记录供下一轮读取的人工意见；模型参数和启动操作统一放在研究指令台。</span>
+                </div>
+                <form id="model-form" class="form-grid model-guidance-form">
+                  <label class="field field-span-2">
+                    <span>人工干预</span>
+                    <textarea name="human_guidance" rows="4" placeholder="例如：下一轮优先检查 top10/drop1 稳定性；不要 promote；对比 IC-weight baseline。"></textarea>
+                  </label>
+                  <div class="form-actions field-span-2">
+                    <button class="primary" type="submit">记录人工干预</button>
+                  </div>
+                </form>
+              </article>
+            </section>
+            <section class="model-workspace-section" id="model-workspace-records">
+              <article class="surface">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Registry · 资产</p>
+                    <h3>模型库</h3>
+                  </div>
+                  <span class="section-hint">展示 research / candidate / production；candidate 只由正式 Rolling 达标产生。</span>
+                </div>
+                <div id="model-records-detail" class="detail-block"></div>
+              </article>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-stock-research">
+        <header class="hero compact">
+          <div>
+            <p class="eyebrow">Stock Research · 个股研究</p>
+            <h2>个股研究</h2>
+          </div>
+        </header>
+        <section class="overview-grid">
+          <article class="surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Roadmap</p><h3>建设边界</h3></div>
+            </div>
+            <div id="stock-research-detail" class="detail-block"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-trading">
+        <header class="hero compact paper-page-hero">
+          <div>
+            <p class="eyebrow">Production Paper Trading</p>
+            <h2>模拟交易</h2>
+            <p class="hero-copy">先选择账户，再查看当前持仓、下一步调仓和历史账本。生产控制与诊断集中在“控制台”。</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost" id="refresh-trading" type="button">刷新交易状态</button>
+          </div>
+        </header>
+        <nav class="workspace-nav paper-trading-tabbar" aria-label="模拟交易账户视图">
+          <div class="workspace-nav-list paper-primary-tabs">
+            <button class="workspace-tab" type="button" data-paper-trading-tab="console"><span>控制台</span></button>
+            <button class="workspace-tab active" type="button" data-paper-trading-tab="overview"><span>账户总览</span></button>
+            <button class="workspace-tab" type="button" data-paper-trading-tab="risk"><span>风控策略</span></button>
+            <button class="workspace-tab" type="button" data-paper-trading-tab="plan"><span>调仓计划</span></button>
+            <button class="workspace-tab" type="button" data-paper-trading-tab="trades"><span>交易记录</span></button>
+          </div>
+        </nav>
+        <section class="surface paper-automation-summary" aria-label="模拟交易后台自动化摘要">
+          <div id="trading-background-workflow-summary" class="paper-automation-summary-content"></div>
+        </section>
+        <section class="surface paper-account-context">
+          <div id="paper-account-switcher"></div>
+          <div id="paper-account-context"></div>
+        </section>
+        <section id="trading-summary" class="paper-primary-dashboard"></section>
+
+        <section class="paper-trading-tab-panel" data-paper-trading-pane="console" hidden>
+          <nav class="paper-console-subnav" aria-label="生产控制台子模块">
+            <button class="active" type="button" data-paper-console-tab="status"><strong>运行总览</strong><small>当前判断与衔接状态</small></button>
+            <button type="button" data-paper-console-tab="automation"><strong>后台自动化</strong><small>定时器与单次任务</small></button>
+            <button type="button" data-paper-console-tab="accounts"><strong>账户组</strong><small>全部生产账户</small></button>
+            <button type="button" data-paper-console-tab="create"><strong>新建任务</strong><small>创建并绑定模型账户</small></button>
+            <button type="button" data-paper-console-tab="replay"><strong>补跑与修复</strong><small>所选账户日期缺口</small></button>
+            <button type="button" data-paper-console-tab="diagnostics"><strong>诊断审计</strong><small>阻断、命令与文件</small></button>
+            <button type="button" data-paper-console-tab="settings"><strong>风控参数</strong><small>下一份推荐约束</small></button>
+          </nav>
+
+          <section class="paper-console-module active" data-paper-console-pane="status">
+            <div class="paper-console-scope"><span>GLOBAL + SELECTED ACCOUNT</span><strong>全局生产链路与当前所选账户</strong><small>这里只给出判断，不执行写操作。</small></div>
+            <section class="surface trading-cockpit trading-command-center paper-console-status">
+              <header class="trading-command-toolbar paper-console-status-head">
+                <div class="trading-command-copy">
+                  <p class="eyebrow">Production Operations</p>
+                  <div class="paper-console-status-title">
+                    <h3>运行总览</h3>
+                    <p class="hero-copy">确认生产数据、模型、调仓计划和账户账本是否顺利衔接。</p>
+                  </div>
+                </div>
+                <div class="paper-console-status-meta" aria-label="运行总览说明">
+                  <strong>4 个生产环节</strong>
+                  <small>只读实时快照</small>
+                </div>
+              </header>
+              <div id="trading-advice"></div>
+              <div id="trading-flow" class="trading-flow"></div>
+              <div id="trading-risk" class="trading-risk"></div>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="automation" hidden>
+            <div class="paper-console-scope"><span>GLOBAL AUTOMATION</span><strong>全局后台任务</strong><small>不受账户下拉框影响。</small></div>
+            <section class="surface background-workflow-panel paper-console-background-workflows">
+              <div class="section-head compact">
+                <div><p class="eyebrow">Background Automation</p><h3>后台自动化</h3></div>
+                <span class="section-hint">定时器负责等待；单次执行服务完成后会正常退出。</span>
+              </div>
+              <div class="background-automation-guide" aria-label="后台自动化字段说明">
+                <article><strong>运行机制</strong><span>定时器负责等待，到点后启动一次性任务；任务完成后退出是正常行为。</span></article>
+                <article><strong>结果判断</strong><span>“成功 · 退出码 0”表示本轮完整结束；只有失败或非零退出码才需要处理。</span></article>
+                <article><strong>资源统计</strong><span>内存或交换峰值显示“未提供”代表 systemd 未保留该次统计，不代表实际使用量为 0。</span></article>
+              </div>
+              <div id="background-automation-action-result" class="background-automation-action-result" hidden></div>
+              <div id="trading-background-workflow-status" class="background-workflow-grid"></div>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="accounts" hidden>
+            <div class="paper-console-scope"><span>ACCOUNT GROUP</span><strong>全部生产模拟账户</strong><small>可切换查看，也可暂停或恢复后续自动运行。</small></div>
+            <section class="surface paper-console-account-group">
+              <div class="section-head">
+                <div><p class="eyebrow">Account Group</p><h3>账户运行概况</h3></div>
+                <span class="section-hint">暂停只停止后续自动日切，不改写已有持仓和账本；恢复前会执行完整性检查。</span>
+              </div>
+              <div id="paper-account-action-result" class="paper-console-action-result" hidden></div>
+              <div id="paper-fleet-overview" class="detail-block"></div>
+              <div id="paper-account-comparison" class="detail-block"></div>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="create" hidden>
+            <div class="paper-console-scope is-protected"><span>NEW PAPER ACCOUNT</span><strong>新建模拟交易任务</strong><small>创建账户并永久绑定一个已晋升模型。</small></div>
+            <section class="surface paper-console-create-task">
+              <div class="section-head">
+                <div><p class="eyebrow">Create Paper Trading Task</p><h3>新建模拟交易任务</h3></div>
+                <span class="section-hint">新账户拥有独立持仓、账本和待执行计划；创建操作需要再次确认。</span>
+              </div>
+              <div class="paper-account-create-guide">
+                <article><span>01</span><strong>指定账户 ID</strong><small>使用稳定且唯一的生产账户标识。</small></article>
+                <article><span>02</span><strong>选择模型库版本</strong><small>从模型库选择已晋升版本；一个生产模拟账户永久绑定一个模型（Model Run）。</small></article>
+                <article><span>03</span><strong>设置生效日期</strong><small>只从生效日开始建立独立账本。</small></article>
+              </div>
+              <div id="paper-account-create-result" class="paper-console-action-result" hidden></div>
+              <form id="paper-account-create-form" class="form-grid paper-account-create-form">
+                <div class="field field-span-2 paper-account-rule">
+                  <span>账户与模型规则</span>
+                  <small>同时运行或比较多个模型时，必须分别创建多个账户。账户显示名称由模型来源、特征集和模型时间自动生成。</small>
+                </div>
+                <label class="field"><span>新账户 ID</span><input name="account_id" type="text" placeholder="paper-prod-model-b" required /></label>
+                <label class="field"><span>选择模型库生产模型</span><select id="paper-account-model-run-select" name="model_run_id" required><option value="">正在读取模型库生产模型…</option></select></label>
+                <label class="field"><span>生效日期</span><input name="effective_from" type="date" required /></label>
+                <label class="field"><span>策略契约</span><select name="strategy_contract_version"><option value="confidence_cash_top20_drop2_hold5_open_v2" selected>置信度控仓 + 现金 V2</option><option value="top20_drop2_hold5_open_v1">旧版满仓基线</option></select></label>
+                <div class="field field-span-2 paper-account-create-note"><span>固定生产参数</span><small>初始资金 1,000,000 · Top 20 · Drop 2 · 最短持有 5 日 · 次日开盘成交。</small></div>
+                <div class="form-actions field-span-2"><button class="primary" type="submit">确认并创建任务</button></div>
+              </form>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="replay" hidden>
+            <div class="paper-console-scope"><span>SELECTED ACCOUNT</span><strong id="paper-replay-scope-account">当前所选账户</strong><small>仅检查该账户，已完成日期不会重复成交。</small></div>
+            <section class="surface paper-console-replay">
+              <div class="section-head">
+                <div><p class="eyebrow">Replay & Repair</p><h3>补跑与修复</h3></div>
+                <span class="section-hint">先生成精确补跑计划；只有存在日期缺口时才需要执行。</span>
+              </div>
+              <div id="paper-replay-center" class="detail-block"></div>
+              <section class="paper-replay-control-panel" aria-label="补跑控制">
+                <header>
+                  <div><span>Protected Replay Control</span><strong>补跑操作</strong></div>
+                  <small>先检查缺口，确认精确日期后才能执行。</small>
+                </header>
+                <form id="paper-replay-form" class="paper-replay-form">
+                  <input name="account_id" type="hidden" />
+                  <label><span>起始日期</span><input name="from_date" type="date" /></label>
+                  <label><span>结束日期</span><input name="to_date" type="date" /></label>
+                  <div class="paper-replay-control-actions">
+                    <button class="ghost" type="button" id="reset-paper-replay-range">自动范围</button>
+                    <button class="ghost" type="button" id="plan-paper-replay">检查缺口</button>
+                    <button class="primary danger-soft" type="button" id="run-paper-replay" disabled>执行补跑</button>
+                  </div>
+                </form>
+                <footer><span>保护规则</span><small>已完成日期不会覆盖；存在阻断时禁止执行；长区间需要再次确认。</small></footer>
+              </section>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="diagnostics" hidden>
+            <div class="paper-console-scope"><span>READ ONLY</span><strong>运行诊断与审计</strong><small>检查不会成交，也不会改写账户账本。</small></div>
+            <section class="surface paper-console-diagnostics">
+              <div class="trading-command-toolbar">
+                <div class="trading-command-copy"><p class="eyebrow">Diagnostics & Audit</p><h3>诊断审计</h3><p class="hero-copy">查看最近日切、生产阻断、运行命令和所选账户审计文件。</p></div>
+                <div class="trading-quick-actions">
+                  <button class="ghost" id="dry-run-daily-ops" type="button">检查运行条件</button>
+                  <button class="ghost" id="copy-daily-ops-command" type="button">复制运行命令</button>
+                </div>
+              </div>
+              <div id="trading-daily-ops" class="detail-block"></div>
+              <div class="terminal-files-head"><p class="eyebrow">Audit Files</p><h4>审计文件</h4></div>
+              <div id="trading-files" class="detail-block"></div>
+            </section>
+          </section>
+
+          <section class="paper-console-module" data-paper-console-pane="settings" hidden>
+            <div class="paper-console-scope is-protected"><span>RISK POLICY</span><strong>风控参数</strong><small>只管理下一份新推荐使用的生产约束。</small></div>
+            <section class="surface paper-console-settings-section">
+              <div class="section-head">
+                <div><p class="eyebrow">Risk Policy Control</p><h3>风控策略参数</h3></div>
+                <span class="section-hint">修改只影响下一份新推荐，已冻结计划不会被改写。</span>
+              </div>
+              <div id="risk-policy-console-status" class="detail-block"></div>
+              <form id="risk-policy-form" class="form-grid paper-risk-policy-form">
+                <label class="field"><span>策略状态</span><select name="enabled"><option value="true">启用</option><option value="false">停用</option></select></label>
+                <label class="field"><span>执行模式</span><select name="mode"><option value="enforced">正式约束</option><option value="shadow">影子观察</option></select></label>
+                <label class="field"><span>波动率阈值（%）</span><input name="volatility_threshold" type="number" min="5" max="80" step="0.5" /></label>
+                <label class="field"><span>市场压力仓位（%）</span><input name="stress_cap" type="number" min="25" max="100" step="5" /></label>
+                <label class="field"><span>压力确认（交易日）</span><input name="enter_days" type="number" min="1" max="10" step="1" /></label>
+                <label class="field"><span>恢复确认（交易日）</span><input name="exit_days" type="number" min="1" max="20" step="1" /></label>
+                <label class="field"><span>账户回撤阈值（%）</span><input name="drawdown_threshold" type="number" min="2" max="30" step="0.5" /></label>
+                <label class="field"><span>账户制动仓位（%）</span><input name="brake_cap" type="number" min="20" max="100" step="5" /></label>
+                <div class="form-actions field-span-2"><button class="primary" type="submit">保存风控参数</button></div>
+              </form>
+            </section>
+          </section>
+        </section>
+
+        <section class="paper-trading-tab-panel" data-paper-trading-pane="risk" hidden>
+          <article class="surface paper-risk-policy-surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Risk Policy</p><h3>风控策略</h3></div>
+              <span class="section-hint">T 日收盘计算，仅作用于 T+1 开盘目标；不改变模型排序。</span>
+            </div>
+            <div id="trading-risk-policy" class="detail-block"></div>
+          </article>
+        </section>
+
+        <section class="paper-trading-tab-panel active" data-paper-trading-pane="overview">
+          <article class="surface paper-chart-surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Equity vs Benchmark</p><h3>账户净值与同期基准</h3></div>
+              <span class="section-hint">账户与沪深 300 均以同期首日为 0%，悬停曲线可查看当天持仓与成交。</span>
+            </div>
+            <div id="trading-account" class="detail-block"></div>
+          </article>
+          <article class="surface paper-position-surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Executed Portfolio</p><h3>当前已执行持仓</h3></div>
+              <span class="section-hint">与账户总览合并展示；这里是已成交持仓，不是下一交易日计划。</span>
+            </div>
+            <div id="trading-positions" class="detail-block"></div>
+          </article>
+        </section>
+
+        <section class="paper-trading-tab-panel" data-paper-trading-pane="plan" hidden>
+          <article class="surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Next Trading Day</p><h3>下一步调仓</h3></div>
+              <span class="section-hint">展示最新冻结推荐及其待执行买卖计划。</span>
+            </div>
+            <div id="trading-picks" class="detail-block"></div>
+          </article>
+        </section>
+
+        <section class="paper-trading-tab-panel" data-paper-trading-pane="trades" hidden>
+          <article class="surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Trades & Ledger</p><h3>成交与账本</h3></div>
+              <span class="section-hint">按日期查看已成交订单和账户日结记录。</span>
+            </div>
+            <div id="trading-trades" class="detail-block"></div>
+          </article>
+        </section>
+
+      </section>
+
+      <section class="panel" id="panel-library">
+        <header class="hero compact">
+          <div>
+            <p class="eyebrow">Registry · 注册表</p>
+            <h2>因子库</h2>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost" id="refresh-library" type="button">刷新因子库</button>
+            <button class="ghost" id="factor-audit-quality" type="button">质量核查</button>
+            <button class="ghost" id="factor-audit-information" type="button">信息簇核查</button>
+            <button class="primary" id="factor-audit-all" type="button">全部核查</button>
+          </div>
+        </header>
+
+        <section class="summary-grid" id="library-summary"></section>
+
+        <section class="library-workbench">
+          <div class="library-tabbar" role="tablist" aria-label="因子库工作区">
+            <button class="workspace-tab library-tab active" type="button" data-library-tab="registry">已注册因子</button>
+            <button class="workspace-tab library-tab" type="button" data-library-tab="feature-sets">因子组合</button>
+            <button class="workspace-tab library-tab" type="button" data-library-tab="quality">因子库质量</button>
+          </div>
+
+          <section class="library-tab-panel active" id="library-tab-registry">
+            <section class="surface library-search-card">
+              <div class="section-head compact-head">
+                <div>
+                  <p class="eyebrow">Search & Filter</p>
+                  <h3>筛选与检索</h3>
+                </div>
+              </div>
+              <div class="library-toolbar">
+                <input id="library-search" type="search" aria-label="搜索因子" placeholder="搜索因子 ID、表达式、分类或 WQ 状态" />
+                <select id="library-status-filter" aria-label="按因子状态筛选">
+                  <option value="all">全部状态</option>
+                  <option value="active">仅 active</option>
+                  <option value="pending">仅 pending</option>
+                  <option value="retired">仅 retired</option>
+                </select>
+                <select id="library-category-filter" aria-label="按因子分类筛选">
+                  <option value="all">全部分类</option>
+                </select>
+                <select id="library-holding-filter" aria-label="按持有周期筛选">
+                  <option value="all">全部周期</option>
+                </select>
+              </div>
+            </section>
+
+            <section class="library-registry-grid">
+              <article class="surface library-table-surface">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="eyebrow">Factor Library</p>
+                    <h3>平台已注册因子</h3>
+                  </div>
+                  <span class="section-hint">点击行查看右侧详情。</span>
+                </div>
+                <div id="factor-table" class="table-shell"></div>
+              </article>
+
+              <article class="surface factor-library-inspector">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="eyebrow">Factor Detail</p>
+                    <h3>因子详情</h3>
+                  </div>
+                </div>
+                <div id="library-inspector-detail" class="detail-block inspector-detail"></div>
+              </article>
+            </section>
+          </section>
+
+          <section class="library-tab-panel" id="library-tab-feature-sets">
+            <article class="surface">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Factor Sets</p>
+                  <h3>因子组合</h3>
+                </div>
+                <span class="section-hint">来自最近一次信息簇核查；信息家族、强相关簇和 Feature Set 使用同一份因子值证据。</span>
+              </div>
+              <div id="factor-feature-sets" class="detail-block"></div>
+              <div id="factor-relation-graph" class="detail-block relation-inline-block"></div>
+            </article>
+          </section>
+
+          <section class="library-tab-panel" id="library-tab-quality">
+            <article class="surface">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Factor Audit · 质量治理</p>
+                  <h3>因子库质量</h3>
+                </div>
+                <span class="section-hint">覆盖、缺失、异常和表达式去重的展示面板；后台治理以 fxalpha-platform MCP 为准。</span>
+              </div>
+              <div id="factor-library-audit" class="detail-block"></div>
+              <div class="library-governance-inline">
+                <div class="inline-governance-head">
+                  <div>
+                    <p class="eyebrow">Expression Dedup</p>
+                    <h4>完全重复表达式检查</h4>
+                  </div>
+                  <span>注册表层面的精确表达式去重；不会自动退休因子。</span>
+                </div>
+                <div id="duplicate-audit" class="detail-block compact-detail"></div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-model-library">
+        <header class="hero compact">
+          <div>
+            <p class="eyebrow">Model Registry · 模型库</p>
+            <h2>模型库</h2>
+            <p class="hero-copy">集中查看 research 资产、正式 Rolling candidate、生产模型和模型库记录，并与模型回测页保持联动。</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost" id="refresh-model-library" type="button">刷新模型库</button>
+          </div>
+        </header>
+        <section class="summary-grid" id="model-library-summary"></section>
+        <section class="model-library-workbench">
+          <article class="surface model-library-registry">
+            <div class="section-head">
+              <div><p class="eyebrow">Model Registry</p><h3>模型库全量记录</h3></div>
+              <span class="section-hint">来自 `model_registry.db`；research 不能直接生产，candidate 只由正式 Rolling 达标产生。</span>
+            </div>
+            <div id="model-table" class="table-shell"></div>
+          </article>
+          <article class="surface model-library-inspector">
+            <div class="section-head">
+              <div><p class="eyebrow">Current Focus</p><h3>当前选择与联动</h3></div>
+              <span class="section-hint">“查看”会跳转到模型研究 / 回测结果，并沿用当前选中的模型回测上下文。</span>
+            </div>
+            <div id="model-library-selection" class="detail-block inspector-detail"></div>
+          </article>
+        </section>
+        <details class="surface model-library-feature-sets model-library-secondary-catalog">
+          <summary>
+            <span><small class="eyebrow">Feature Sets</small><strong>Feature Set 目录</strong></span>
+            <small class="section-hint">辅助数据 · 默认收起</small>
+          </summary>
+          <div id="model-library-feature-sets"><div class="empty-state">Feature Set catalog loading...</div></div>
+        </details>
+      </section>
+
+      <section class="panel" id="panel-data-foundation">
+        <header class="hero compact">
+          <div>
+            <p class="eyebrow">Data Foundation · 数据底座</p>
+            <h2>数据底座</h2>
+            <p class="hero-copy">围绕 Tushare 生产日更、安全 staging、兼容桥状态和人工确认后的真实执行入口组织数据工作台。</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost" id="refresh-data-foundation" type="button">刷新数据状态</button>
+          </div>
+        </header>
+        <section class="surface background-workflow-panel data-background-workflows">
+          <div class="section-head compact">
+            <div><p class="eyebrow">Data Automation</p><h3>数据日更运行状态</h3></div>
+            <span class="section-hint">生产数据与当前后台任务分开显示</span>
+          </div>
+          <div id="data-background-workflow-status" class="background-workflow-grid"></div>
+        </section>
+        <section class="summary-grid" id="data-foundation-summary"></section>
+        <nav class="workspace-nav data-foundation-nav" aria-label="数据底座子菜单">
+          <div class="workspace-nav-list">
+            <button class="workspace-tab data-foundation-tab active" type="button" data-data-foundation-tab="status" aria-pressed="true">
+              <span>数据情况</span>
+            </button>
+            <button class="workspace-tab data-foundation-tab" type="button" data-data-foundation-tab="live" aria-pressed="false">
+              <span>更新现场</span>
+            </button>
+            <button class="workspace-tab data-foundation-tab" type="button" data-data-foundation-tab="query" aria-pressed="false">
+              <span>数据库查询</span>
+            </button>
+          </div>
+        </nav>
+        <section class="data-foundation-tab-panel" id="data-foundation-status-panel">
+          <article class="surface data-foundation-status-card">
+            <div class="section-head">
+              <div><p class="eyebrow">Production Data Quality</p><h3>数据质量驾驶舱</h3></div>
+              <span class="section-hint">只读展示生产库质量、覆盖、字段完整性、Schema、基准与复权一致性。</span>
+            </div>
+            <div id="data-foundation-detail" class="detail-block inspector-detail"></div>
+          </article>
+        </section>
+        <section class="data-foundation-tab-panel" id="data-foundation-live-panel" hidden>
+          <article class="surface data-live-surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Live Update Floor</p><h3>更新现场</h3></div>
+              <span class="section-hint">实时读取日更、全量重建、转换、合并和兼容输出状态。</span>
+            </div>
+            <div class="data-live-toolbar">
+              <div class="data-live-refresh-zone">
+                <button class="ghost refresh-action" type="button" id="refresh-data-live">
+                  <span>刷新现场</span>
+                  <small>拉取最新状态</small>
+                </button>
+              </div>
+              <form id="data-live-control-form" class="data-live-control-panel">
+                <label class="field date-field">
+                  <span>目标日期</span>
+                  <span class="date-input-shell"><input name="target_date" type="date" /><button class="date-picker-button" type="button" aria-label="选择目标日期"><span class="date-picker-glyph" aria-hidden="true"></span></button></span>
+                </label>
+                <div class="data-live-command-actions">
+                  <button class="ghost" type="button" id="data-live-preflight">Pre flight</button>
+                  <button class="primary" type="button" id="start-data-daily-live">日期更新</button>
+                  <button class="ghost danger-soft" type="button" id="start-data-full-rebuild-live">全量重建</button>
+                </div>
+              </form>
+            </div>
+            <div id="data-live-preflight-result" class="data-live-preflight-result"></div>
+            <div id="data-live-detail" class="data-live-detail"></div>
+          </article>
+        </section>
+        <section class="data-foundation-tab-panel" id="data-foundation-query-panel" hidden>
+          <article class="surface data-query-surface">
+            <div class="section-head">
+              <div><p class="eyebrow">Production HDF Query</p><h3>数据库查询</h3></div>
+              <span class="section-hint">按股票代码抽查生产库字段、状态和趋势。</span>
+            </div>
+            <form id="data-query-form" class="data-query-form">
+              <label class="field data-query-form-field"><span>股票代码</span><input name="code" type="text" value="000001" placeholder="000001 / 000001.SZ" autocomplete="off" /></label>
+              <label class="field date-field data-query-form-field"><span>开始日期</span><span class="date-input-shell"><input name="start" type="date" /><button class="date-picker-button" type="button" aria-label="选择开始日期"><span class="date-picker-glyph" aria-hidden="true"></span></button></span></label>
+              <label class="field date-field data-query-form-field"><span>结束日期</span><span class="date-input-shell"><input name="end" type="date" /><button class="date-picker-button" type="button" aria-label="选择结束日期"><span class="date-picker-glyph" aria-hidden="true"></span></button></span></label>
+              <label class="field data-query-form-field"><span>图表模式</span>
+                <select name="transform">
+                  <option value="zscore">Z-score</option>
+                  <option value="index100">首值归一 100</option>
+                  <option value="raw">原始值</option>
+                  <option value="pct_change">日变化率 %</option>
+                </select>
+              </label>
+              <label class="field data-query-form-field"><span>基准</span><input name="benchmark" type="text" value="000300.SH" autocomplete="off" /></label>
+              <div class="data-query-actions-bar">
+                <div class="section-hint">输入代码与日期窗口后直接查询，字段在下方面板常驻配置。</div>
+                <div class="form-actions">
+                  <button class="ghost" type="button" id="data-query-load-fields">刷新字段</button>
+                  <button class="primary" type="button" id="data-query-submit">查询</button>
+                </div>
+              </div>
+            </form>
+            <section class="data-query-fields-shell">
+              <div class="data-query-fields-title">
+                <p class="eyebrow">Field Panel</p>
+                <h4>字段面板</h4>
+              </div>
+              <div id="data-query-fields" class="data-query-fields"></div>
+            </section>
+            <div id="data-query-result" class="data-query-result"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="metric-card-template">
+    <article class="metric-card">
+      <p class="metric-label"></p>
+      <p class="metric-value"></p>
+      <p class="metric-note"></p>
+    </article>
+  </template>
+
+  <script src="/gui/app.js?v=20260810-overview-v128"></script>
+</body>
+</html>

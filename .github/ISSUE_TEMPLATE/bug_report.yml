@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible FXAlpha defect without private data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, production data, databases, or private logs.
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: Commit SHA and affected submodule pins.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal sanitized steps and expected versus actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Relevant status, error, and test output with secrets removed.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: I removed secrets, private data, databases, and identifying operator paths.
+          required: true

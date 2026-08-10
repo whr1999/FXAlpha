@@ -1,0 +1,9 @@
+[submodule "third_party/quantgpt"]
+	path = third_party/quantgpt
+	url = https://github.com/whr1999/QuantGPT.git
+[submodule "third_party/qlib"]
+	path = third_party/qlib
+	url = https://github.com/whr1999/qlib.git
+[submodule "third_party/tushare"]
+	path = third_party/tushare
+	url = https://github.com/whr1999/tushare.git

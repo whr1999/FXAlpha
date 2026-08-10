@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose a scoped improvement without private production material.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: External code contributions are not yet accepted; focused design proposals are welcome.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the user or operational problem, not only a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed contract
+      description: Describe inputs, outputs, compatibility requirements, gates, and expected evidence.
+    validations:
+      required: true
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Platform lane
+      options:
+        - Data foundation
+        - Factor research
+        - Model research
+        - Prediction and recommendation
+        - Qlib paper trading
+        - Platform operations or documentation
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: This proposal contains no credentials, private data, databases, artifacts, or identifying operator paths.
+          required: true

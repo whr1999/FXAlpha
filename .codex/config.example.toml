@@ -1,0 +1,25 @@
+# Copy the MCP definitions you need into your personal Codex configuration.
+# Repository-specific paths are intentionally relative and no sandbox or
+# approval policy is prescribed by the public project.
+
+[mcp_servers.quantgpt]
+command = "python3"
+args = ["-m", "quantgpt.mcp_server"]
+
+[mcp_servers.quantgpt.env]
+PYTHONPATH = "third_party/quantgpt"
+PYTHONUNBUFFERED = "1"
+
+[mcp_servers.fxalpha-model]
+command = "python3"
+args = ["-m", "mcp_servers.model_server", "--transport", "stdio"]
+
+[mcp_servers.fxalpha-model.env]
+PYTHONPATH = "."
+
+[mcp_servers.fxalpha-platform]
+command = "python3"
+args = ["-m", "mcp_servers.platform_server", "--transport", "stdio"]
+
+[mcp_servers.fxalpha-platform.env]
+PYTHONPATH = "."

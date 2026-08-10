@@ -1,0 +1,1 @@
+"""FXAlpha MCP server entrypoints."""

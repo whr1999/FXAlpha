@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-08-10",
+  "classification": "owner_approved_point_in_time_runtime_ui",
+  "review_note": "The owner explicitly approved these original UI captures for public documentation. Manual review found no API key, token, credential, local filesystem path, or device metadata. The images are documentary snapshots and are not reproducibility evidence.",
+  "screenshots": [
+    {
+      "path": "docs/assets/screenshots/platform-overview.jpeg",
+      "title": "Platform overview",
+      "width": 1864,
+      "height": 1510,
+      "bytes": 822449,
+      "sha256": "a2fbac58d043692944df5f21b327587f5c267f3552604f16df95711cae88fe34"
+    },
+    {
+      "path": "docs/assets/screenshots/factor-research.jpeg",
+      "title": "Factor research",
+      "width": 1871,
+      "height": 1104,
+      "bytes": 605279,
+      "sha256": "c4bed64795748e3574e445be08a2fc4ea12332a62f652fe61d4f70fae65a48fe"
+    },
+    {
+      "path": "docs/assets/screenshots/model-research.jpeg",
+      "title": "Model research",
+      "width": 1865,
+      "height": 4357,
+      "bytes": 2363546,
+      "sha256": "f9187aca87e153f7084b3dd0ebd4848b2dd1abd578c60d930333a112f057ca75"
+    },
+    {
+      "path": "docs/assets/screenshots/paper-trading.jpeg",
+      "title": "Paper trading",
+      "width": 1879,
+      "height": 1139,
+      "bytes": 578288,
+      "sha256": "75b10a954080b7bcab824b0620996af3a4aa1524d5621c6d139c54dec065df6f"
+    }
+  ]
+}

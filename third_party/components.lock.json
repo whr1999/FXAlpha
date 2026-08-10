@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "repository_url": "https://github.com/whr1999/FXAlpha.git",
+  "publication_branch": "main",
+  "components": [
+    {
+      "name": "QuantGPT",
+      "path": "third_party/quantgpt",
+      "upstream_url": "https://github.com/Miasyster/QuantGPT.git",
+      "fork_url": "https://github.com/whr1999/QuantGPT.git",
+      "pin": "024818abcf76b35f0a8282f9a212c2309716defd",
+      "upstream_base": "76e5ad859af0c520dea942bd8174756303b23291",
+      "source_kind": "git",
+      "publication_blocker": null
+    },
+    {
+      "name": "Qlib",
+      "path": "third_party/qlib",
+      "upstream_url": "https://github.com/microsoft/qlib.git",
+      "fork_url": "https://github.com/whr1999/qlib.git",
+      "pin": "d5379c520f66a39953bad76234a7019a72796fd0",
+      "upstream_base": "d5379c520f66a39953bad76234a7019a72796fd0",
+      "source_kind": "git",
+      "publication_blocker": null
+    },
+    {
+      "name": "Tushare",
+      "path": "third_party/tushare",
+      "upstream_url": "https://github.com/waditu/tushare.git",
+      "fork_url": "https://github.com/whr1999/tushare.git",
+      "pin": "bc5388dcb339ce7e11515cab5cb6087b3724e74b",
+      "upstream_base": null,
+      "source_kind": "pypi_wheel_overlay",
+      "release_artifact": {
+        "filename": "tushare-1.4.29-py3-none-any.whl",
+        "sha256": "82554af953ea5ac3d8771d42330493181031c7e68dccce03a491c7356e9ba4b2",
+        "source_files": 74
+      },
+      "publication_blocker": null
+    }
+  ]
+}

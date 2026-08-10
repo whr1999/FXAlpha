@@ -1,0 +1,21 @@
+[Unit]
+Description=FXAlpha governed Tushare data-foundation daily update
+After=network-online.target
+Wants=network-online.target
+OnSuccess=fxalpha-paper-fleet-daily.service
+StartLimitIntervalSec=6h
+StartLimitBurst=8
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/FXAlpha
+EnvironmentFile=-%h/.config/fxalpha/fxalpha.env
+Environment=FXALPHA_CONFIG_FILE=%h/FXAlpha/config.yaml
+Environment=PYTHONPATH=%h/FXAlpha
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/FXAlpha/.venv/bin/python3 %h/FXAlpha/cli.py data-daily-routine --target-date auto --timeout-minutes 180
+TimeoutStartSec=4h
+KillMode=control-group
+Nice=5
+Restart=on-failure
+RestartSec=30min

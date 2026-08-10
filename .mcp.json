@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "quantgpt": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "quantgpt.mcp_server"],
+      "env": {
+        "PYTHONPATH": "third_party/quantgpt",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "fxalpha-model": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "mcp_servers.model_server", "--transport", "stdio"],
+      "env": {
+        "PYTHONPATH": ".",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "fxalpha-platform": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "mcp_servers.platform_server", "--transport", "stdio"],
+      "env": {
+        "PYTHONPATH": ".",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}

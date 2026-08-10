@@ -1,0 +1,180 @@
+paths:
+  third_party_root: "third_party"
+  production_raw_hdf5: "data/raw/tushare/stock_daily.h5"
+  production_raw_metadata: "data/raw/tushare/metadata.json"
+  production_trading_calendar_file: "data/raw/tushare/trade_calendar.txt"
+  production_trading_calendar_meta: "data/raw/tushare/trade_calendar_meta.json"
+  quantgpt_data_dir: "data/quantgpt/stocks"
+  quantgpt_benchmark_dir: "data/quantgpt/benchmark"
+  quantgpt_code_root: "third_party/quantgpt"
+  qlib_source_root: "third_party/qlib"
+  qlib_data_root: "data/qlib"
+  metadata_root: "data/metadata"
+  factor_data_root: "data/factors"
+  factor_parquet_dir: "data/factors/parquet"
+  factor_registry_db: "data/factors/factor_registry.db"
+  model_data_root: "data/model"
+  model_features_root: "data/model/features"
+  model_feature_sets_root: "data/model/features/feature_sets"
+  model_active_feature_dir: "data/model/features/active"
+  model_active_feature_file: "data/model/features/active/combined_factors_df.parquet"
+  model_active_feature_manifest: "data/model/features/active/manifest.json"
+  model_registry_db: "data/model/model_registry.db"
+  trading_data_root: "data/trading"
+  trading_execution_log_db: "data/trading/execution_log.db"
+
+# Platform-wide evaluation intent. The runtime state file selects only the
+# default for newly-created tasks; every task persists the resolved profile.
+# Model execution does not consume the production profile in stage 1.
+platform_evaluation:
+  schema_version: "evaluation_contract_v1"
+  default_mode: "production"
+  profiles:
+    research:
+      profile_version: "research_v1"
+      label: "研究模式"
+      evidence_class: "clean_holdout"
+      factor:
+        selection_start_date: "2022-01-01"
+        selection_end_date: "2024-12-31"
+        value_start_date: "2022-01-01"
+        value_end_date: "2026-06-30"
+      model:
+        evaluation_policy: "clean_holdout_existing"
+        implementation_status: "existing_unchanged"
+    production:
+      profile_version: "production_v1"
+      label: "生产模式"
+      evidence_class: "discovery_conditioned_rolling"
+      factor:
+        selection_start_date: "2022-01-01"
+        selection_end_date: "2026-06-30"
+        value_start_date: "2022-01-01"
+        value_end_date: "2026-06-30"
+      model:
+        evaluation_policy: "production_walk_forward_v1"
+        implementation_status: "planned_not_enabled"
+
+data_foundation:
+  max_missing_pct: 0.05
+  latest_status_file: "runtime/data_foundation/latest_status.json"
+  tushare:
+    token: ""
+    api_base: "https://api.tushare.pro"
+
+factor_research:
+  default_qgpt_url: "http://127.0.0.1:8003"
+  # Production defaults to the governed background Orchestrator. Codex MCP is
+  # retained as an explicit manual debugging and evidence-review mode.
+  default_orchestration_mode: "orchestrator"
+  default_universe: "tradable_non_st"
+  default_start_date: "2022-01-01"
+  # Compatibility fallback only. Governed runs resolve their selection/value
+  # windows from platform_evaluation and snapshot that profile in the task.
+  default_end_date: "2026-06-30"
+  default_value_start_date: "2022-01-01"
+  default_value_end_date: "2026-06-30"
+  default_holding_period: 5
+  rolling_validation:
+    schema_version: "rolling_validation_v2"
+    score_policy_version: "rolling_ic_recency_robust_v1"
+    max_history_months: 48
+    min_history_months: 24
+    period_weights: [0.40, 0.25, 0.15, 0.12, 0.08]
+    stability_penalty: 0.25
+    rank_ic_full_score: 0.08
+    min_dates_per_6m: 60
+    trailing_horizons_months: [6, 12, 24, 36, 48]
+  default_benchmark: "hs300"
+  default_n_candidates: 10
+  default_n_rounds: 0
+  default_target_adopted: 10
+  default_seed_count: 3
+  default_seed_max_concurrent: 3
+  default_max_direction_attempts: 3
+  default_max_stagnation_rounds: 3
+  quick_score_max_stocks: 360
+  quick_score_max_dates: 252
+  deep_validate_top_n: 2
+  st_exposure_guard_mode: "advisory"
+  enable_wq_submit: false
+
+model:
+  evaluation_mode: "research"
+  screening_seed: 42
+  confirmation_seeds: [17, 83]
+  comparison_seed_set: [42, 17, 83]
+  latest_status_file: "runtime/model/latest_status.json"
+  active_feature_set_file: "runtime/model/active_feature_set.json"
+  default_start_date: "2022-01-01"
+  default_end_date: "2026-07-01"
+  default_selection_cutoff: "2025-06-30"
+  # Model label horizon is the prediction target, not the rebalance frequency.
+  # Keep it aligned with factor-research admission horizon unless an experiment
+  # explicitly tests a different label target.
+  default_forward_period: 5
+  default_factor_holding_period: 5
+  default_status_filter: "active"
+  default_family: "lgbm"
+  default_policy: "qlib_lgbm_canonical"
+  default_benchmark: "000300sh"
+  default_topk: 20
+  default_n_drop: 2
+  allowed_policies: ["qlib_lgbm_canonical", "lgbm_safe", "tabular_ensemble", "sequence_experimental"]
+  default_valid_months: 6
+  default_test_months: 11
+
+  # Default single-period research window. New ORCH/MCP experiments inherit
+  # these values unless an explicit operator payload overrides them.
+  default_segments:
+    train: ["2022-01-04", "2024-12-31"]
+    valid: ["2025-01-02", "2025-06-30"]
+    test: ["2025-07-01", "2026-07-01"]
+  research_scoring:
+    meaningful_improvement: 1.0
+    confirmation_score_drop_limit: 10.0
+    max_ir_std: 0.60
+    max_return_std: 0.20
+    max_worst_seed_drawdown: 0.30
+  rolling:
+    profile: "four_fold_expanding_6m_v1"
+    valid_months: 6
+    test_months: 6
+    fold_count: 4
+    purge_trading_days: 5
+    preliminary_seed: 42
+    confirmation_seeds: [17, 83]
+    preliminary_score_threshold: 60.0
+    candidate_score_threshold: 70.0
+    max_ir_std: 0.60
+    max_return_std: 0.20
+    max_median_drawdown: 0.30
+  production_refit:
+    enabled: true
+    shift_months: 12
+    segments:
+      train: ["2023-01-03", "2025-12-31"]
+      valid: ["2026-01-02", "2026-06-30"]
+      test: ["2026-01-02", "2026-07-01"]
+  allowed_sample_weight_policies: ["top50_smooth2_bottom50_smooth1p5_mean_norm"]
+  default_sample_weight_policy: "top50_smooth2_bottom50_smooth1p5_mean_norm"
+  default_sample_weight_kwargs:
+    top_n: 50
+    top_max: 2.0
+    bottom_n: 50
+    bottom_max: 1.5
+    normalize_mean: true
+
+llm:
+  quant_research:
+    provider: "deepseek"
+    api_key: ""
+    base_url: "https://api.deepseek.com/v1"
+    model: "deepseek-v4-pro"
+    cross_review_model: "deepseek-v4-pro"
+
+pipeline:
+  latest_status_file: "runtime/pipeline/latest_status.json"
+  default_factor_target: 10
+  default_factor_sessions: 3
+  default_model_family: "lgbm"

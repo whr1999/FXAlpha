@@ -1,0 +1,16 @@
+FXAlpha third-party notices
+===========================
+
+The following projects are represented by pinned Git submodules and are not
+relicensed by FXAlpha:
+
+* QuantGPT, upstream https://github.com/Miasyster/QuantGPT, MIT License.
+  FXAlpha integration branch: third_party/quantgpt at the commit recorded by
+  the main repository.
+* Qlib, upstream https://github.com/microsoft/qlib, MIT License.
+  FXAlpha pin: third_party/qlib at the commit recorded by the main repository.
+* Tushare, upstream https://github.com/waditu/tushare, BSD 3-Clause License.
+  FXAlpha pin: third_party/tushare at the commit recorded by the main repository.
+
+Each submodule contains its own license and attribution files. Downstream users
+must comply with those terms independently of the FXAlpha project license.
