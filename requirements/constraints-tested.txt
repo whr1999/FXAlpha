@@ -3,7 +3,7 @@
 anyio==4.12.1
 httpx==0.28.1
 Jinja2==3.1.6
-lightgbm==4.6.0
+lightgbm==4.7.0
 mcp==1.26.0
 mlflow==3.5.0
 numpy==2.4.3
