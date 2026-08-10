@@ -9,7 +9,7 @@ mlflow==3.5.0
 numpy==2.4.3
 openai==2.29.0
 pandas==2.3.3
-pyarrow==21.0.0
+pyarrow==23.0.1
 PyYAML==6.0.3
 requests==2.32.5
 scikit-learn==1.8.0
