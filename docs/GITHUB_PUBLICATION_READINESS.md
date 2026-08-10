@@ -1,129 +1,96 @@
 # GitHub publication readiness
 
-Audit date: 2026-08-10
+Audit and publication date: 2026-08-10
 
-## Scope and safety boundary
+## Result
 
-The work was performed in a private staging workspace outside the deployed
-checkout. The deployed source directory, user services, production
-databases, Qlib environment, data, runtime state, and `.vntrader` directory were
-not switched or edited.
+Status: **ready for the `v0.1.0` release**.
 
-## Phase 1 — freeze and inventory
+The public repository is [whr1999/FXAlpha](https://github.com/whr1999/FXAlpha).
+It is source-visible under the repository's all-rights-reserved license; it is
+not represented as an open-source project. Publication did not migrate or
+replace the deployed production workspace.
+
+## Isolation boundary
+
+All public-release construction and repair work was performed in a separate
+checkout outside the deployed tree. The deployed source directory, user
+services, production databases, market data, Qlib data, factor values, trained
+models, predictions, paper-account state, runtime files, and archived vn.py
+environment were not switched or edited.
+
+## Phase closure
+
+### Phase 1 — freeze and inventory
 
 Status: complete.
 
-- froze the source/runtime dependency baseline
-- copied the trading database and current paper-fleet status into a private,
-  permission-restricted audit directory outside the repository
-- archived local vn.py state and recorded SHA-256 checksums
-- recorded the deployed Python package set
 - classified source, data, runtime, secrets, artifacts, and third-party trees
+- recorded the production baseline without placing private evidence in the
+  public repository
+- preserved production and archived vn.py state outside the public checkout
 
-## Phase 2 — public candidate construction
+### Phase 2 — public candidate construction
 
 Status: complete.
 
-- copied source into a new Git working tree
-- excluded data, runtime, databases, artifacts, logs, virtual environments,
-  caches, local configuration, secrets, and historical private archives
-- generated sanitized configuration examples
-- removed personal absolute paths from tracked current material
-- added project/security/contribution notices and a publication-focused README
-- made configuration portable through `FXALPHA_CONFIG_FILE`
+- built a clean public Git history outside the production checkout
+- excluded data, databases, factor values, models, predictions, accounts,
+  runtime state, logs, caches, virtual environments, credentials, and private
+  archives
+- added sanitized examples, bilingual entrypoints, user guides, workflow
+  specifications, screenshots, and an end-to-end system architecture diagram
+- made local paths configurable and added fail-closed tree/history audits
 
-## Phase 3 — dependency and execution cleanup
+### Phase 3 — dependencies and execution cleanup
 
-Status: complete locally; external fork creation remains.
+Status: complete.
 
-- converted QuantGPT, Qlib, and Tushare to pinned submodules
-- prepared local fork branches and secure QuantGPT defaults
-- retired vn.py application/runtime contracts from the candidate
-- retained Qlib paper fleet/replay behavior
-- documented upstream/fork ownership and license boundaries
+- published QuantGPT, Qlib, and Tushare as real public forks and locked exact
+  reviewed commits
+- preserved Tushare 1.4.29 byte/hash/license provenance on the approved fork
+  branch
+- retired vn.py application and execution contracts from the public platform
+- retained Qlib exchange semantics for paper-account execution and replay
+- pinned the dependency set tested by Python 3.11 and 3.12 CI
 
-## Phase 4 — verification and release gates
+### Phase 4 — verification and GitHub controls
 
-Status: complete locally; see
-[`VERIFICATION_REPORT_20260810.md`](VERIFICATION_REPORT_20260810.md).
+Status: complete.
 
-- repository-hygiene and secret-pattern audit
-- Python compile/import checks
-- regression suite in a copied environment with vn.py packages removed
-- GitHub Actions CI, CodeQL, and dependency-update configuration
-- clean-clone/submodule and documentation-link checks
-- exact publication and production-cutover runbooks
-- production-asset shadow validation on isolated ports and copied registries
-- external-data path contract regression for quality reports and metadata cache
-- bilingual business-workflow and formula contracts routed from both READMEs,
-  both user guides, the architecture guide, and the current documentation index
-- four owner-approved runtime UI captures reviewed for credentials and metadata,
-  recorded in a hash manifest, and routed through bilingual screenshot guides
+- public-tree, reachable-history, compile, documentation, topology, and test
+  gates pass
+- an anonymous network-fresh recursive clone resolves all three Gitlinks
+- protected `main` requires Python 3.11, Python 3.12, and CodeQL checks, enforces
+  linear history, and blocks force pushes and deletion
+- secret scanning, push protection, Dependabot security updates, private
+  vulnerability reporting, and CodeQL are enabled
+- current open alert counts are zero for Dependabot, CodeQL, and secret scanning
 
-## External actions still required
+The detailed bilingual evidence is in
+[`VERIFICATION_REPORT_20260810.md`](VERIFICATION_REPORT_20260810.md) and
+[`VERIFICATION_REPORT_20260810.zh-CN.md`](VERIFICATION_REPORT_20260810.zh-CN.md).
 
-These actions mutate GitHub and were deliberately not performed by local audit:
+## Published third-party pins
 
-1. Create `whr1999/QuantGPT`, `whr1999/qlib`, and `whr1999/tushare` as real
-   GitHub forks of their official upstreams.
-2. Publish the byte-verified Tushare 1.4.29 candidate on an FXAlpha-owned branch
-   of the real GitHub fork; disconnected commit ancestry is accepted for this
-   release and recorded in the fork policy.
-3. Push each `codex/fxalpha-public` branch and confirm the recorded commits are
-   reachable from its public remote.
-4. Create `whr1999/FXAlpha`, enable secret scanning, push protection, Dependabot,
-   CodeQL, and branch protection.
-5. Push the tested `codex/github-publication-final` HEAD as public `main`; verify
-   submodules initialize in a fresh unauthenticated clone and CI passes.
-6. Decide whether to retain all-rights-reserved terms or adopt an open-source
-   license before inviting contributions.
+| Component | Public fork | Locked commit |
+| --- | --- | --- |
+| QuantGPT | `whr1999/QuantGPT` | `024818abcf76b35f0a8282f9a212c2309716defd` |
+| Qlib | `whr1999/qlib` | `d5379c520f66a39953bad76234a7019a72796fd0` |
+| Tushare 1.4.29 | `whr1999/tushare` | `bc5388dcb339ce7e11515cab5cb6087b3724e74b` |
 
-Current automated preflight state: local topology passed for all three
-components with no local release blockers. Network evidence on 2026-08-10 was
-intermittent: an anonymous fetch of official Qlib succeeded and the four target
-repository API requests returned 404, but a later complete release gate hit
-`gnutls_handshake` failures for all four Git URLs. Public-pin and recursive-clone
-gates therefore remain closed until the repositories are created or made public,
-populated, and one uninterrupted anonymous release check passes.
-
-The final commands are fail-closed gates:
+The release check is fail closed:
 
 ```bash
-python scripts/audit_public_repo.py
-python scripts/audit_git_history.py
-python scripts/verify_publication_topology.py --release
+python scripts/run_release_preflight.py --release
 ```
 
-The topology command verifies each public fork pin and clones the main
-repository recursively from GitHub. It must not be replaced by a local-path
-clone.
+It must not be replaced by a local-path clone.
 
-## Publication order
+## Release and production limits
 
-```text
-QuantGPT fork -> Qlib fork -> real Tushare fork -> verify public pins
-              -> create FXAlpha repo -> push tested HEAD as main -> CI
-              -> network-fresh acceptance -> release tag
-```
-
-Do not publish the main repository before all three submodule commits are
-publicly reachable; otherwise a recursive clone will fail.
-
-The command-level handoff is in
-[`GITHUB_UPLOAD_RUNBOOK.md`](GITHUB_UPLOAD_RUNBOOK.md).
-
-## Production cutover (separate change)
-
-Publication does not authorize production migration. A later cutover must:
-
-1. refresh database/config/runtime backups and checksums
-2. build a fresh environment from the public pins
-3. start the candidate on a different loopback port
-4. use copied registries, independent runtime, and read-only large-data mounts
-5. compare data, factor, model, prediction, and paper-fleet health independently
-6. stop the old unit only after acceptance; switch unit paths atomically
-7. keep the previous workspace/environment and rollback instructions intact
-8. observe at least one full scheduled cycle before cleanup
-
-No production data migration, systemd switch, package uninstall, or `.vntrader`
-deletion was performed during phases 1–4.
+The repository publication and `v0.1.0` release do not authorize a production
+cutover. A later cutover remains a separate reviewed operation using isolated
+ports, copied registries, read-only large-data mounts, independent acceptance,
+and a tested rollback. No production data migration, systemd switch, package
+uninstall, or `.vntrader` deletion was performed by the publication work.

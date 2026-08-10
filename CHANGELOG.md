@@ -3,7 +3,7 @@
 All notable changes to the public FXAlpha project are recorded here. Release
 dates and tags are added only after the corresponding GitHub CI run passes.
 
-## [0.1.0] - Pending
+## [0.1.0] - 2026-08-10
 
 ### Added
 
