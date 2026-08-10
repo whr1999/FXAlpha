@@ -8,7 +8,7 @@ mcp==1.26.0
 mlflow==3.5.0
 numpy==2.4.3
 openai==2.29.0
-pandas==2.3.3
+pandas==3.0.5
 pyarrow==21.0.0
 PyYAML==6.0.3
 requests==2.32.5
