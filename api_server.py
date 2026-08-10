@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 import gzip
-import mimetypes
+import os
+import re
 import subprocess
 import sys
 import threading
 import time
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -320,11 +322,83 @@ _GET_RESPONSE_CACHE: dict[str, tuple[float, bytes]] = {}
 _DATA_PREFLIGHT_LOCK = threading.Lock()
 _DATA_PREFLIGHT_CACHE: dict[str, tuple[float, dict]] = {}
 _DATA_PREFLIGHT_CACHE_TTL_SECONDS = 60.0
+_LOCAL_ORIGIN_RE = re.compile(
+    r"^https?://(?:localhost|127\.0\.0\.1|\[::1\])(?::[1-9][0-9]{0,4})?$",
+    re.IGNORECASE,
+)
+_GUI_CONTENT_TYPES = {
+    ".css": "text/css; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json",
+    ".md": "text/markdown; charset=utf-8",
+    ".svg": "image/svg+xml",
+}
+
+
+def _normalize_preflight_target_date(target_date: str | None) -> str:
+    text = str(target_date or "auto").strip().lower()
+    if text in {"", "auto"}:
+        return "auto"
+    compact = text.replace("-", "")
+    if re.fullmatch(r"[0-9]{8}", compact) is None:
+        raise ValueError("target_date must be auto, YYYYMMDD, or YYYY-MM-DD")
+    try:
+        parsed = datetime.strptime(compact, "%Y%m%d")
+    except ValueError as exc:
+        raise ValueError("target_date must be a valid calendar date") from exc
+    return parsed.strftime("%Y-%m-%d")
+
+
+def _allowed_cors_origin(value: str | None) -> str | None:
+    origin = str(value or "").strip()
+    if origin == "null":
+        return "null"
+    if _LOCAL_ORIGIN_RE.fullmatch(origin) is None:
+        return None
+    parsed = urlparse(origin)
+    try:
+        port = parsed.port
+    except ValueError:
+        return None
+    hostname = str(parsed.hostname or "").lower()
+    if hostname not in {"127.0.0.1", "localhost", "::1"}:
+        return None
+    serialized_host = "[::1]" if hostname == "::1" else hostname
+    port_suffix = f":{port}" if port is not None else ""
+    return f"{parsed.scheme.lower()}://{serialized_host}{port_suffix}"
+
+
+def _resolve_gui_asset(rel_path: str) -> Path | None:
+    root = os.path.realpath(str(GUI_ROOT))
+    relative = str(rel_path)
+    if os.path.isabs(relative):
+        return None
+    candidate_text = os.path.realpath(os.path.join(root, relative))
+    root_prefix = root.rstrip(os.sep) + os.sep
+    if not candidate_text.startswith(root_prefix):
+        return None
+    candidate = Path(candidate_text)
+    return candidate if candidate.is_file() else None
+
+
+def _gui_content_type(path: Path) -> str:
+    return _GUI_CONTENT_TYPES.get(path.suffix.lower(), "application/octet-stream")
 
 
 def _isolated_data_daily_preflight(target_date: str = "auto") -> tuple[dict, int]:
     """Run the memory-heavy data preflight outside the long-lived API process."""
-    target = str(target_date or "auto").strip() or "auto"
+    try:
+        target = _normalize_preflight_target_date(target_date)
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "err": "invalid_target_date",
+            "inputs": {"target_date": str(target_date or "")},
+            "outputs": {"error": str(exc)},
+            "artifacts": {},
+            "warnings": [],
+        }, 400
     now = time.monotonic()
     with _DATA_PREFLIGHT_LOCK:
         cached = _DATA_PREFLIGHT_CACHE.get(target)
@@ -339,6 +413,9 @@ def _isolated_data_daily_preflight(target_date: str = "auto") -> tuple[dict, int
             target,
         ]
         try:
+            # The date is reduced to "auto" or a validated calendar value and
+            # passed as one argv element with shell=False.
+            # codeql[py/command-line-injection]
             completed = subprocess.run(
                 command,
                 cwd=PROJECT_ROOT,
@@ -433,14 +510,12 @@ class APIHandler(BaseHTTPRequestHandler):
         if use_gzip:
             self.send_header("Content-Encoding", "gzip")
             self.send_header("Vary", "Accept-Encoding")
-        origin = str(self.headers.get("Origin") or "").strip()
-        parsed_origin = urlparse(origin) if origin and origin != "null" else None
-        if origin == "null" or (
-            parsed_origin is not None
-            and parsed_origin.scheme in {"http", "https"}
-            and parsed_origin.hostname in {"127.0.0.1", "localhost", "::1"}
-        ):
-            self.send_header("Access-Control-Allow-Origin", origin)
+        allowed_origin = _allowed_cors_origin(self.headers.get("Origin"))
+        if allowed_origin is not None:
+            # Keep the sink-level sanitizer explicit for data-flow analyzers in
+            # addition to the strict grammar and canonical reconstruction above.
+            header_origin = allowed_origin.replace("\n", "").replace("\r", "")
+            self.send_header("Access-Control-Allow-Origin", header_origin)
             self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
@@ -953,12 +1028,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 return
             full = runtime_file
         else:
-            safe_rel = Path(rel_path)
-            full = (GUI_ROOT / safe_rel).resolve()
-            if not str(full).startswith(str(GUI_ROOT.resolve())) or not full.exists() or not full.is_file():
+            full = _resolve_gui_asset(rel_path)
+            if full is None:
                 self._send_json({"ok": False, "error": "gui_not_found"}, status=404)
                 return
-        mime, _ = mimetypes.guess_type(str(full))
         body = full.read_bytes()
         parsed_request = urlparse(self.path)
         is_versioned_asset = bool(parse_qs(parsed_request.query).get("v")) and full.suffix.lower() in {".css", ".js"}
@@ -969,7 +1042,7 @@ class APIHandler(BaseHTTPRequestHandler):
         )
         wire_body = gzip.compress(body, compresslevel=5) if use_gzip else body
         self.send_response(200)
-        self.send_header("Content-Type", mime or "application/octet-stream")
+        self.send_header("Content-Type", _gui_content_type(full))
         self.send_header("Content-Length", str(len(wire_body)))
         if use_gzip:
             self.send_header("Content-Encoding", "gzip")

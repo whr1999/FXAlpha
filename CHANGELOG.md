@@ -44,6 +44,10 @@ dates and tags are added only after the corresponding GitHub CI run passes.
 - the overview asset is versioned as `20260810-overview-v128` so embedded
   browsers cannot keep executing the stale loader; render failures now replace
   the loading skeleton with a visible, versioned diagnostic
+- public CI installs PyTables for the HDF5-backed data tests and detects broken
+  pytest session symlinks consistently on Python 3.11 and 3.12
+- GUI asset serving uses canonical containment instead of a string-prefix path
+  check, and response headers use strict origin and content-type allowlists
 
 ### Removed
 
@@ -57,5 +61,10 @@ dates and tags are added only after the corresponding GitHub CI run passes.
 - trained-model formats, factor-value datasets, archives, personal assistant
   configuration, and editor state are rejected by ignore and audit policy
 - GitHub Actions are fixed to full commit SHAs and run with minimum permissions
+- API launch defaults to loopback; preflight subprocess dates and Tushare
+  source-bind addresses are strictly normalized before use
+- MCP, MLflow, PyArrow, Requests, and PyTables are pinned to the versions
+  validated by the final public release gate; generic Dependabot submodule
+  updates cannot replace reviewed fork integration pins
 
 [0.1.0]: https://github.com/whr1999/FXAlpha/releases/tag/v0.1.0
