@@ -934,7 +934,7 @@ def main() -> None:
     p_audit_run.add_argument("--family-dependency-cut", type=float, default=0.55)
 
     p = sub.add_parser("serve-api", help="Start FXAlpha HTTP API for service-layer calls")
-    p.add_argument("--host", default="0.0.0.0")
+    p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8080)
 
     p = sub.add_parser("model-feature-refresh", help="Build active combined_factors_df.parquet for model training")

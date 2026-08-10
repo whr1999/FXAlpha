@@ -175,6 +175,7 @@ PYTHONPATH=. .venv/bin/python api_server.py --host 127.0.0.1 --port 18081
 - [项目结构](docs/PROJECT_STRUCTURE_CURRENT.md)
 - [工程变更护栏](docs/CODEX_ENGINEERING_GUARDRAILS.md)
 - [第三方 Fork 策略](docs/THIRD_PARTY_FORKS.md)
+- [安全策略与部署边界](SECURITY.md)
 - [vn.py 退役说明](docs/VNPY_RETIREMENT.md)
 - [发布就绪状态](docs/GITHUB_PUBLICATION_READINESS.md)
 - [GitHub 上传手册](docs/GITHUB_UPLOAD_RUNBOOK.md)
@@ -202,3 +203,7 @@ PYTHONPATH=. .venv/bin/python api_server.py --host 127.0.0.1 --port 18081
 
 发现漏洞请使用 GitHub 私有安全公告。不要在公开 Issue 中粘贴凭据、生产数据、
 因子值、模型文件、未经审查的账户截图或私有日志。
+
+受支持的本地部署默认只把 FXAlpha API 绑定到 `127.0.0.1`，MLflow 使用本地
+`file://` 跟踪目录，不会启动 MLflow HTTP 服务。任何远程部署前请先阅读
+[SECURITY.md](SECURITY.md)。

@@ -201,6 +201,7 @@ tree and reachable Git history.
 - [Project structure](docs/PROJECT_STRUCTURE_CURRENT.md)
 - [Engineering guardrails](docs/CODEX_ENGINEERING_GUARDRAILS.md)
 - [Third-party fork policy](docs/THIRD_PARTY_FORKS.md)
+- [Security policy and deployment boundary](SECURITY.md)
 - [vn.py retirement](docs/VNPY_RETIREMENT.md)
 - [Publication readiness](docs/GITHUB_PUBLICATION_READINESS.md)
 - [GitHub upload runbook](docs/GITHUB_UPLOAD_RUNBOOK.md)
@@ -233,3 +234,7 @@ terms.
 Report vulnerabilities with a private GitHub security advisory. Never paste
 credentials, production data, factor values, model files, unreviewed account
 screenshots, or private logs into a public issue.
+
+The supported local deployment binds the FXAlpha API to `127.0.0.1` and uses
+MLflow through a local `file://` tracking store; it does not start an MLflow
+HTTP server. See [SECURITY.md](SECURITY.md) before any remote deployment.
