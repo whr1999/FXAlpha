@@ -160,11 +160,11 @@ def audit() -> dict[str, object]:
                             "detail": marker,
                         }
                     )
-        for name, pattern in SECRET_PATTERNS.items():
+        for pattern in SECRET_PATTERNS.values():
             if pattern.search(content):
                 violations.append(
                     {
-                        "kind": f"secret_pattern_in_history:{name}",
+                        "kind": "secret_pattern_detected_in_history",
                         "path": path,
                         "object": object_id,
                     }
@@ -192,9 +192,6 @@ def audit() -> dict[str, object]:
 
 def main() -> int:
     result = audit()
-    # Secret matches are reduced to rule names, paths, and Git object IDs;
-    # matched credential bytes are never retained in or emitted by result.
-    # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0 if result["status"] == "passed" else 1
 

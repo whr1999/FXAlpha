@@ -48,6 +48,8 @@ dates and tags are added only after the corresponding GitHub CI run passes.
   pytest session symlinks consistently on Python 3.11 and 3.12
 - GUI asset serving uses canonical containment instead of a string-prefix path
   check, and response headers use strict origin and content-type allowlists
+- public-tree and Git-history secret audits emit only fixed finding categories
+  and locations, never matched content or detector labels
 
 ### Removed
 
