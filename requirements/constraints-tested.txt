@@ -1,6 +1,6 @@
 # Direct dependency versions used for the 2026-08-09 public staging audit.
 # Third-party engines are pinned by Git submodule commit instead of PyPI here.
-anyio==4.12.1
+anyio==4.14.2
 httpx==0.28.1
 Jinja2==3.1.6
 lightgbm==4.6.0
