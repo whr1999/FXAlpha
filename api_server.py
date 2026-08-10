@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import gzip
+import os
 import re
 import subprocess
 import sys
@@ -369,21 +370,15 @@ def _allowed_cors_origin(value: str | None) -> str | None:
 
 
 def _resolve_gui_asset(rel_path: str) -> Path | None:
-    root = GUI_ROOT.resolve()
-    relative = Path(rel_path)
-    if relative.is_absolute():
+    root = os.path.realpath(str(GUI_ROOT))
+    relative = str(rel_path)
+    if os.path.isabs(relative):
         return None
-    # resolve() collapses traversal segments and follows symlinks; relative_to()
-    # below then proves that the resolved path is inside the resolved GUI root.
-    # codeql[py/path-injection]
-    candidate = (root / relative).resolve()
-    try:
-        candidate.relative_to(root)
-    except ValueError:
+    candidate_text = os.path.realpath(os.path.join(root, relative))
+    root_prefix = root.rstrip(os.sep) + os.sep
+    if not candidate_text.startswith(root_prefix):
         return None
-    # Only a path that passed the canonical root-containment proof reaches this
-    # filesystem check.
-    # codeql[py/path-injection]
+    candidate = Path(candidate_text)
     return candidate if candidate.is_file() else None
 
 
@@ -517,10 +512,10 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_header("Vary", "Accept-Encoding")
         allowed_origin = _allowed_cors_origin(self.headers.get("Origin"))
         if allowed_origin is not None:
-            # The helper accepts a CR/LF-free loopback-origin grammar and
-            # reconstructs the value from parsed scheme, host, and numeric port.
-            # codeql[py/http-response-splitting]
-            self.send_header("Access-Control-Allow-Origin", allowed_origin)
+            # Keep the sink-level sanitizer explicit for data-flow analyzers in
+            # addition to the strict grammar and canonical reconstruction above.
+            header_origin = allowed_origin.replace("\n", "").replace("\r", "")
+            self.send_header("Access-Control-Allow-Origin", header_origin)
             self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")

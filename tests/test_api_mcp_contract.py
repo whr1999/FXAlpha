@@ -218,10 +218,12 @@ def test_gui_asset_resolution_cannot_escape_same_prefix_directory(monkeypatch, t
     sibling.mkdir()
     secret = sibling / "secret.html"
     secret.write_text("private", encoding="utf-8")
+    (gui_root / "escape-link").symlink_to(sibling, target_is_directory=True)
     monkeypatch.setattr(api_server, "GUI_ROOT", gui_root)
 
     assert api_server._resolve_gui_asset("index.html") == index.resolve()
     assert api_server._resolve_gui_asset("../gui-private/secret.html") is None
+    assert api_server._resolve_gui_asset("escape-link/secret.html") is None
     assert api_server._resolve_gui_asset(str(secret)) is None
     assert api_server._gui_content_type(index) == "text/html; charset=utf-8"
 
