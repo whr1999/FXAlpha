@@ -23,6 +23,12 @@ blockers is [`third_party/components.lock.json`](../third_party/components.lock.
    separate reviewed commit.
 6. Record upstream base, local commit, test result, and migration notes.
 
+Dependabot does not update these submodules. Its generic Git-submodule updater
+follows a fork's default branch and cannot preserve the reviewed FXAlpha
+integration-branch contract. Submodule updates therefore remain manual,
+reviewed changes that must update both the Gitlink and
+`third_party/components.lock.json` together.
+
 ## Current local candidates
 
 - QuantGPT is a local clone of the deployed integration with secure defaults,

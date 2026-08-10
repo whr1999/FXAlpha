@@ -20,3 +20,26 @@ The bundled API is a loopback application service, not an Internet-facing
 security boundary. Remote deployments must add TLS, authentication,
 authorization, request limits, audit logging, and network isolation at a
 reverse proxy or application gateway.
+
+The `fxalpha serve-api` command and the documented launch scripts bind to
+`127.0.0.1` by default. Treat any explicit non-loopback `--host` value as an
+operator-managed remote deployment and apply the controls above before use.
+
+## MLflow boundary
+
+The supported FXAlpha workflow uses `MlflowClient` with a local `file://`
+tracking URI. This repository does not launch an MLflow HTTP tracking server,
+AI Gateway, model-serving endpoint, or artifact-serving endpoint. Upstream
+MLflow advisories that require those server surfaces are therefore outside the
+supported deployment path, but they become relevant if an operator enables
+such a service independently. Do not expose an MLflow service based on this
+repository without separate authentication, authorization, network isolation,
+and an advisory review of the exact installed version.
+
+## Dependency and fork updates
+
+Python and GitHub Actions version updates are proposed by Dependabot, but are
+never merged automatically. Major-version changes require a separate
+compatibility review. Third-party Git submodule pins are intentionally updated
+by the reviewed fork procedure in `docs/THIRD_PARTY_FORKS.md`; a fork's default
+branch is not an approved replacement for an FXAlpha integration pin.

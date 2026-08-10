@@ -5,13 +5,16 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    allow:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-patch
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
-  - package-ecosystem: gitsubmodule
-    directory: "/"
-    schedule:
-      interval: monthly
-    open-pull-requests-limit: 3
+
+# Git submodule pins intentionally stay outside Dependabot. Each pin targets a
+# reviewed FXAlpha integration branch and must pass docs/THIRD_PARTY_FORKS.md.

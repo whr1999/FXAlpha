@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import importlib.util
 import subprocess
+import sys
 from pathlib import Path
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -127,3 +130,28 @@ def test_third_party_sources_are_gitlinks():
 
     assert len(gitlinks) == 3
     assert regular_files == ["third_party/components.lock.json"]
+
+
+def test_public_security_defaults_and_dependency_update_boundary(monkeypatch):
+    import cli
+
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        cli,
+        "cmd_serve_api",
+        lambda args: captured.update(host=args.host, port=args.port),
+    )
+    monkeypatch.setattr(sys, "argv", ["cli.py", "serve-api"])
+    cli.main()
+
+    assert captured == {"host": "127.0.0.1", "port": 8080}
+
+    dependabot = yaml.safe_load(
+        (ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+    )
+    ecosystems = {entry["package-ecosystem"] for entry in dependabot["updates"]}
+    assert ecosystems == {"pip", "github-actions"}
+
+    security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    assert "`file://`" in security
+    assert "does not launch an MLflow HTTP tracking server" in security
