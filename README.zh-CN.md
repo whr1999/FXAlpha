@@ -162,6 +162,7 @@ PYTHONPATH=. .venv/bin/python api_server.py --host 127.0.0.1 --port 18081
 - [业务流程与计算逻辑说明书](docs/BUSINESS_WORKFLOWS.zh-CN.md)
 - [系统界面说明](docs/SCREENSHOTS.zh-CN.md)
 - [本地部署](docs/LOCAL_DEPLOYMENT.md)
+- [路径与文件归属规范](docs/PATH_LAYOUT.zh-CN.md)
 - [架构说明](docs/ARCHITECTURE.md)
 
 ### 平台操作
@@ -175,6 +176,7 @@ PYTHONPATH=. .venv/bin/python api_server.py --host 127.0.0.1 --port 18081
 ### 开发与 GitHub 发布
 
 - [项目结构](docs/PROJECT_STRUCTURE_CURRENT.md)
+- [生产路径规范](docs/PATH_LAYOUT.zh-CN.md)
 - [工程变更护栏](docs/CODEX_ENGINEERING_GUARDRAILS.md)
 - [第三方 Fork 策略](docs/THIRD_PARTY_FORKS.md)
 - [安全策略与部署边界](SECURITY.md)

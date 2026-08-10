@@ -2,8 +2,10 @@
 
 `storage/paths.py` is the code authority. Relative configuration values are
 resolved against the repository root, not the caller's working directory.
-`paths.runtime_root` is the single root for mutable run evidence. In production
-it should be an absolute directory outside the immutable release checkout.
+`paths.data_root` is the common root for durable business data and
+`paths.runtime_root` is the common root for mutable run evidence. In production
+both should be absolute directories outside the immutable release checkout.
+Specific legacy path keys remain higher-priority compatibility overrides.
 
 | Path | Contract |
 | --- | --- |
@@ -31,3 +33,7 @@ staged packages. Third-party source is under `third_party/`, not `data/` or
 matching `DATABASE_URL`; report output is externalized with
 `QUANTGPT_REPORTS_DIR`. None of these mutable assets may be written into the
 pinned submodule in a release deployment.
+
+The complete production topology, ownership table, configuration precedence,
+and migration order are defined in [`PATH_LAYOUT.md`](PATH_LAYOUT.md) and
+[`PATH_LAYOUT.zh-CN.md`](PATH_LAYOUT.zh-CN.md).

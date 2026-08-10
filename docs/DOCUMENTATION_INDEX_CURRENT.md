@@ -39,7 +39,10 @@ credentials, or service state.
 12. [`VNPY_RETIREMENT.md`](VNPY_RETIREMENT.md) — execution decision and evidence.
 13. [`LOCAL_DEPLOYMENT.md`](LOCAL_DEPLOYMENT.md) — isolated install and service
    template instructions.
-14. [`SECURITY.md`](../SECURITY.md), [`SUPPORT.md`](../SUPPORT.md),
+14. [`PATH_LAYOUT.md`](PATH_LAYOUT.md) and
+    [`PATH_LAYOUT.zh-CN.md`](PATH_LAYOUT.zh-CN.md) — canonical production
+    directory ownership, configuration precedence, retention, and migration.
+15. [`SECURITY.md`](../SECURITY.md), [`SUPPORT.md`](../SUPPORT.md),
     [`CHANGELOG.md`](../CHANGELOG.md), and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 The classification and authority status of every top-level document is checked

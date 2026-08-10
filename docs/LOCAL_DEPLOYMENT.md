@@ -57,6 +57,8 @@ checkout. Use a versioned release directory and an atomic `current` symlink:
 ~/fxalpha-deploy/
   current -> releases/<git-commit>/
   releases/<git-commit>/
+~/fxalpha-data/
+  raw/ qlib/ quantgpt/ factors/ model/ trading/ metadata/
 ~/.config/fxalpha/
   config.yaml
   runtime.env
@@ -68,10 +70,12 @@ checkout. Use a versioned release directory and an atomic `current` symlink:
 Templates in `deploy/systemd/release/` implement this layout. `runtime.env` is
 required and must define the absolute `FXALPHA_CONFIG_FILE`; copy
 `runtime.env.example`, replace `USER`, and set mode `0600`. The external config
-must set `paths.runtime_root` to `~/fxalpha-state/runtime` (expanded to an
-absolute path), `paths.quantgpt_db` to the external task ledger, and must map
-all durable data roots explicitly. `DATABASE_URL` in `runtime.env` must select
-the same QuantGPT database file.
+must set `paths.data_root` to `~/fxalpha-data`, `paths.runtime_root` to
+`~/fxalpha-state/runtime` (both expanded to absolute paths), and
+`paths.quantgpt_db` to the external task ledger. `DATABASE_URL` in
+`runtime.env` must select the same QuantGPT database file. Fine-grained path
+overrides are supported for legacy migration but are not required for a new
+standard layout. See [`PATH_LAYOUT.md`](PATH_LAYOUT.md).
 
 Install the four release services, the stack target, and both timer files as
 one versioned unit set. Enable the timers only after the API, QuantGPT, and all
@@ -92,10 +96,10 @@ rollback. Do not delete the old release during the cutover window.
   transient user services receive the allowlisted values from `runtime.env`,
   including `FXALPHA_CONFIG_FILE`. Restart the long-lived service after changing
   that file; do not put a second `config.yaml` inside an immutable release.
-- If durable data lives outside the release checkout, map the complete path
-  set together: raw HDF/metadata/calendar, Qlib, QuantGPT parquet, factor,
-  model, `metadata_root`, and trading. Mapping only the large datasets but not
-  `metadata_root` can make a status request rebuild the stock-identity cache.
+- Set `paths.data_root` once to move raw HDF/metadata/calendar, Qlib, QuantGPT
+  parquet, factor, model, metadata, and trading together. If a legacy config
+  also contains fine-grained overrides, they take precedence and must be
+  reviewed as a complete set.
 - Dataset manifests retain portable repository-relative canonical paths. The
   runtime resolves the Tushare quality report next to the configured production
   HDF when that data tree is externally mounted.

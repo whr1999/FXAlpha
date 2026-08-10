@@ -17,15 +17,25 @@ from storage.paths import (
     ACTIVE_MODEL_FEATURE_SET_FILE,
     CONFIG_FILE,
     CURRENT_PRODUCTION_DATASET_FILE,
+    DATA_ROOT,
+    FACTOR_DATA_ROOT,
     LATEST_MODEL_STATUS_FILE,
     LATEST_STATUS_FILE,
+    MODEL_DATA_ROOT,
     MODEL_RUNTIME_ROOT,
+    QLIB_DATA_ROOT,
     QLIB_SOURCE_ROOT,
     QUANTGPT_DB,
     RUNTIME_ROOT,
+    TRADING_DATA_ROOT,
 )
 print(json.dumps({
     'config_file': str(CONFIG_FILE),
+    'data_root': str(DATA_ROOT),
+    'factor_data_root': str(FACTOR_DATA_ROOT),
+    'model_data_root': str(MODEL_DATA_ROOT),
+    'qlib_data_root': str(QLIB_DATA_ROOT),
+    'trading_data_root': str(TRADING_DATA_ROOT),
     'runtime_root': str(RUNTIME_ROOT),
     'quantgpt_db': str(QUANTGPT_DB),
     'data_latest': str(LATEST_STATUS_FILE),
@@ -53,6 +63,7 @@ print(json.dumps({
 
 
 def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> None:
+    data_root = tmp_path / "durable-data"
     runtime_root = tmp_path / "shadow-state" / "runtime"
     quantgpt_db = runtime_root / "quantgpt" / "quantgpt.db"
     qlib_root = tmp_path / "forks" / "qlib"
@@ -61,6 +72,7 @@ def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> 
         "\n".join(
             (
                 "paths:",
+                f'  data_root: "{data_root}"',
                 f'  runtime_root: "{runtime_root}"',
                 f'  quantgpt_db: "{quantgpt_db}"',
                 f'  qlib_source_root: "{qlib_root}"',
@@ -83,6 +95,11 @@ def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> 
     paths = _probe_paths(config_file, cwd=unrelated_cwd)
 
     assert paths["config_file"] == str(config_file)
+    assert paths["data_root"] == str(data_root)
+    assert paths["factor_data_root"] == str(data_root / "factors")
+    assert paths["model_data_root"] == str(data_root / "model")
+    assert paths["qlib_data_root"] == str(data_root / "qlib")
+    assert paths["trading_data_root"] == str(data_root / "trading")
     assert paths["runtime_root"] == str(runtime_root)
     assert paths["quantgpt_db"] == str(runtime_root / "quantgpt" / "quantgpt.db")
     assert paths["data_latest"] == str(runtime_root / "data_foundation" / "latest_status.json")

@@ -189,6 +189,7 @@ tree and reachable Git history.
 - [Business workflows and calculation logic](docs/BUSINESS_WORKFLOWS.md)
 - [System interface gallery](docs/SCREENSHOTS.md)
 - [Local deployment](docs/LOCAL_DEPLOYMENT.md)
+- [Path and file ownership](docs/PATH_LAYOUT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 
 ### Platform operations
@@ -202,6 +203,7 @@ tree and reachable Git history.
 ### Development and GitHub publication
 
 - [Project structure](docs/PROJECT_STRUCTURE_CURRENT.md)
+- [Production path layout](docs/PATH_LAYOUT.md)
 - [Engineering guardrails](docs/CODEX_ENGINEERING_GUARDRAILS.md)
 - [Third-party fork policy](docs/THIRD_PARTY_FORKS.md)
 - [Security policy and deployment boundary](SECURITY.md)
