@@ -21,11 +21,13 @@ from storage.paths import (
     LATEST_STATUS_FILE,
     MODEL_RUNTIME_ROOT,
     QLIB_SOURCE_ROOT,
+    QUANTGPT_DB,
     RUNTIME_ROOT,
 )
 print(json.dumps({
     'config_file': str(CONFIG_FILE),
     'runtime_root': str(RUNTIME_ROOT),
+    'quantgpt_db': str(QUANTGPT_DB),
     'data_latest': str(LATEST_STATUS_FILE),
     'data_pointer': str(CURRENT_PRODUCTION_DATASET_FILE),
     'model_runtime': str(MODEL_RUNTIME_ROOT),
@@ -52,6 +54,7 @@ print(json.dumps({
 
 def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> None:
     runtime_root = tmp_path / "shadow-state" / "runtime"
+    quantgpt_db = runtime_root / "quantgpt" / "quantgpt.db"
     qlib_root = tmp_path / "forks" / "qlib"
     config_file = tmp_path / "production.yaml"
     config_file.write_text(
@@ -59,6 +62,7 @@ def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> 
             (
                 "paths:",
                 f'  runtime_root: "{runtime_root}"',
+                f'  quantgpt_db: "{quantgpt_db}"',
                 f'  qlib_source_root: "{qlib_root}"',
                 "data_foundation:",
                 '  latest_status_file: "runtime/data_foundation/latest_status.json"',
@@ -80,6 +84,7 @@ def test_external_runtime_root_is_independent_of_process_cwd(tmp_path: Path) -> 
 
     assert paths["config_file"] == str(config_file)
     assert paths["runtime_root"] == str(runtime_root)
+    assert paths["quantgpt_db"] == str(runtime_root / "quantgpt" / "quantgpt.db")
     assert paths["data_latest"] == str(runtime_root / "data_foundation" / "latest_status.json")
     assert paths["data_pointer"] == str(runtime_root / "data_foundation" / "CURRENT_PRODUCTION_DATASET.json")
     assert paths["model_runtime"] == str(runtime_root / "model")

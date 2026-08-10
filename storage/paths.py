@@ -53,6 +53,7 @@ DEFAULT_FACTOR_DATA_ROOT = DEFAULT_DATA_ROOT / "factors"
 DEFAULT_MODEL_DATA_ROOT = DEFAULT_DATA_ROOT / "model"
 DEFAULT_METADATA_ROOT = DEFAULT_DATA_ROOT / "metadata"
 DEFAULT_QUANTGPT_CODE_ROOT = DEFAULT_THIRD_PARTY_ROOT / "quantgpt"
+DEFAULT_QUANTGPT_DB = DEFAULT_QUANTGPT_CODE_ROOT / "quantgpt.db"
 DEFAULT_QLIB_SOURCE_ROOT = DEFAULT_THIRD_PARTY_ROOT / "qlib"
 
 
@@ -112,8 +113,9 @@ QLIB_SOURCE_ROOT = _rooted_path(PATHS.get("qlib_source_root", str(DEFAULT_QLIB_S
 QUANTGPT_DATA_DIR = _rooted_path(PATHS.get("quantgpt_data_dir", str(DEFAULT_QUANTGPT_ROOT / "stocks")))
 QUANTGPT_BENCHMARK_DIR = _rooted_path(PATHS.get("quantgpt_benchmark_dir", str(DEFAULT_QUANTGPT_ROOT / "benchmark")))
 QUANTGPT_CODE_ROOT = _rooted_path(PATHS.get("quantgpt_code_root", str(DEFAULT_QUANTGPT_CODE_ROOT)))
+QUANTGPT_DB = _rooted_path(PATHS.get("quantgpt_db", str(DEFAULT_QUANTGPT_DB))).expanduser()
 QUANTGPT_RESEARCH_NOTES_DIR = _rooted_path(
-    PATHS.get("quantgpt_research_notes_dir", str(DEFAULT_QUANTGPT_CODE_ROOT / "research_notes"))
+    PATHS.get("quantgpt_research_notes_dir", str(QUANTGPT_CODE_ROOT / "research_notes"))
 ).expanduser()
 QLIB_DATA_ROOT = _rooted_path(PATHS.get("qlib_data_root", str(DEFAULT_QLIB_ROOT)))
 FACTOR_DATA_ROOT = _rooted_path(PATHS.get("factor_data_root", str(DEFAULT_FACTOR_DATA_ROOT)))

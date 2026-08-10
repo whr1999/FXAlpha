@@ -71,6 +71,7 @@ from storage.paths import (
     QUANTGPT_API_URL,
     QUANTGPT_ADOPTED_VALUES_FILE,
     QUANTGPT_CODE_ROOT,
+    QUANTGPT_DB,
     QUANTGPT_DATA_DIR,
     QUANTGPT_RESEARCH_NOTES_DIR,
     FACTOR_RESEARCH_ROOT,
@@ -2846,7 +2847,7 @@ def _parse_task_ts(task: dict) -> str:
 
 def _fetch_quantgpt_running_tasks(*, limit: int = 40) -> list[dict]:
     """Read active QuantGPT tasks from its existing DB without reconciling them."""
-    db_path = QUANTGPT_CODE_ROOT / "quantgpt.db"
+    db_path = QUANTGPT_DB
     if not db_path.exists():
         return []
     try:
@@ -2873,7 +2874,7 @@ def _fetch_quantgpt_recent_tasks_snapshot(*, limit: int = 80) -> list[dict]:
     store is QuantGPT's authoritative task ledger and this read remains
     strictly read-only.
     """
-    db_path = QUANTGPT_CODE_ROOT / "quantgpt.db"
+    db_path = QUANTGPT_DB
     if not db_path.exists():
         return []
     try:
@@ -3043,7 +3044,7 @@ def _fetch_quantgpt_tasks_by_ids(task_ids: list[str], *, limit: int = 1000) -> l
             break
     if not ids:
         return []
-    db_path = QUANTGPT_CODE_ROOT / "quantgpt.db"
+    db_path = QUANTGPT_DB
     if not db_path.exists():
         return []
     rows: list[tuple] = []
@@ -6635,7 +6636,7 @@ def factor_research_run_view(*, run_id: str, limit: int = 120, include_history: 
             "research_steps_file": str(FACTOR_RESEARCH_STEPS_FILE),
             "orchestrator_events_file": str(FACTOR_ORCHESTRATOR_EVENTS_FILE),
             "orchestrator_llm_trace_file": str(FACTOR_ORCHESTRATOR_LLM_TRACES_FILE),
-            "quantgpt_db": str(QUANTGPT_CODE_ROOT / "quantgpt.db"),
+            "quantgpt_db": str(QUANTGPT_DB),
         },
     )
 
@@ -7009,7 +7010,7 @@ def _orchestrator_mcp_server():
     root = str(QUANTGPT_CODE_ROOT)
     if root and root not in sys.path:
         sys.path.insert(0, root)
-    db_url = f"sqlite+aiosqlite:///{(QUANTGPT_CODE_ROOT / 'quantgpt.db').resolve()}"
+    db_url = f"sqlite+aiosqlite:///{QUANTGPT_DB.resolve()}"
     if not os.environ.get("DATABASE_URL") or os.environ.get("DATABASE_URL") == "sqlite+aiosqlite:///./quantgpt.db":
         os.environ["DATABASE_URL"] = db_url
     os.environ.setdefault("QUANTGPT_TASK_BACKEND", "thread")

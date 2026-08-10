@@ -69,7 +69,9 @@ Templates in `deploy/systemd/release/` implement this layout. `runtime.env` is
 required and must define the absolute `FXALPHA_CONFIG_FILE`; copy
 `runtime.env.example`, replace `USER`, and set mode `0600`. The external config
 must set `paths.runtime_root` to `~/fxalpha-state/runtime` (expanded to an
-absolute path) and must map all durable data roots explicitly.
+absolute path), `paths.quantgpt_db` to the external task ledger, and must map
+all durable data roots explicitly. `DATABASE_URL` in `runtime.env` must select
+the same QuantGPT database file.
 
 Create a new release without changing the live symlink, build its `.venv`, run
 tests, then start shadow processes on QuantGPT `8004` and API `18082` with an

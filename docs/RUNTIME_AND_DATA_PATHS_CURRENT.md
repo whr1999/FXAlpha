@@ -14,6 +14,7 @@ it should be an absolute directory outside the immutable release checkout.
 | `data/model/` | model registry and feature snapshots |
 | `data/trading/` | execution/account registry |
 | `runtime/data_foundation/` | staged packages, production pointer, audits |
+| `runtime/quantgpt/quantgpt.db` | QuantGPT task ledger when configured for release deployment |
 | `runtime/factor_research/` | run journals, events, traces, locks |
 | `runtime/model/jobs/` | managed job metadata and worker logs |
 | `runtime/model/rolling/` | rolling-campaign evidence |
@@ -26,5 +27,7 @@ Important files include `jobs/<job_id>.log`,
 All paths in this document are local state and Git-ignored. Operators must back
 up durable registries separately and must not manually delete active locks or
 staged packages. Third-party source is under `third_party/`, not `data/` or
-`runtime/`. QuantGPT report output is similarly externalized with
-`QUANTGPT_REPORTS_DIR`; it must not be written into the pinned submodule.
+`runtime/`. QuantGPT task state is selected by `paths.quantgpt_db` and the
+matching `DATABASE_URL`; report output is externalized with
+`QUANTGPT_REPORTS_DIR`. None of these mutable assets may be written into the
+pinned submodule in a release deployment.

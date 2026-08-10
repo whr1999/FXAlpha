@@ -3,6 +3,10 @@ paths:
   # with an absolute production or shadow path.
   runtime_root: "runtime"
   third_party_root: "third_party"
+  # Production should place this SQLite database outside the release tree and
+  # set DATABASE_URL to the same absolute file in runtime.env.
+  quantgpt_db: "runtime/quantgpt/quantgpt.db"
+  quantgpt_research_notes_dir: "runtime/quantgpt/research_notes"
   production_raw_hdf5: "data/raw/tushare/stock_daily.h5"
   production_raw_metadata: "data/raw/tushare/metadata.json"
   production_trading_calendar_file: "data/raw/tushare/trade_calendar.txt"
