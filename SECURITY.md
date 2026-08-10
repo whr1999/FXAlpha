@@ -43,3 +43,17 @@ never merged automatically. Major-version changes require a separate
 compatibility review. Third-party Git submodule pins are intentionally updated
 by the reviewed fork procedure in `docs/THIRD_PARTY_FORKS.md`; a fork's default
 branch is not an approved replacement for an FXAlpha integration pin.
+
+## Request, file, and direct-network boundaries
+
+- The isolated daily preflight accepts only `auto`, `YYYYMMDD`, or a valid
+  `YYYY-MM-DD` calendar date before it constructs a shell-free argument list.
+- GUI files are resolved canonically and must remain descendants of the
+  repository's `gui/` directory; sibling-prefix paths and escaping symlinks are
+  rejected.
+- CORS responses echo only a canonical `null` or loopback HTTP(S) origin, and
+  GUI response content types come from a fixed extension map.
+- Tushare direct-network probes may bind only to an explicit unicast IPv4
+  source address. Wildcard, loopback, link-local, multicast, reserved,
+  broadcast, IPv6, and malformed source values are rejected before socket
+  creation reaches the bind operation.

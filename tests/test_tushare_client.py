@@ -83,6 +83,20 @@ class _ResettingSession:
         self.closed = True
 
 
+@pytest.mark.parametrize(
+    "bind_ip",
+    ["0.0.0.0", "127.0.0.1", "169.254.1.1", "224.0.0.1", "255.255.255.255", "::", "not-an-ip"],
+)
+def test_direct_source_address_rejects_non_interface_values(bind_ip):
+    with pytest.raises(ValueError):
+        client._validated_source_ipv4(bind_ip)
+
+
+def test_direct_source_address_accepts_explicit_ipv4_interface():
+    assert client._validated_source_ipv4(None) is None
+    assert client._validated_source_ipv4(" 192.168.1.8 ") == "192.168.1.8"
+
+
 def test_windows_powershell_executable_falls_back_for_systemd_path(monkeypatch, tmp_path):
     powershell = tmp_path / "powershell.exe"
     powershell.touch()

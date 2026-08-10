@@ -6,6 +6,8 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from types import SimpleNamespace
 
+import pytest
+
 import api_server
 from mcp_servers import model_server, platform_server
 from services._base import ok_result
@@ -182,6 +184,46 @@ def test_data_daily_preflight_subprocess_failure_is_structured(monkeypatch):
     assert payload["ok"] is False
     assert payload["err"] == "data_daily_preflight_invalid_output"
     assert payload["outputs"]["stderr_tail"] == "boom"
+
+
+def test_data_daily_preflight_rejects_untrusted_target_before_subprocess(monkeypatch):
+    monkeypatch.setattr(
+        api_server.subprocess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("invalid input must not reach subprocess.run"),
+    )
+
+    payload, status = api_server._isolated_data_daily_preflight("2026-02-30; touch /tmp/x")
+
+    assert status == 400
+    assert payload["ok"] is False
+    assert payload["err"] == "invalid_target_date"
+
+
+def test_cors_origin_is_canonical_and_rejects_header_injection():
+    assert api_server._allowed_cors_origin("http://127.0.0.1:18081") == "http://127.0.0.1:18081"
+    assert api_server._allowed_cors_origin("HTTPS://LOCALHOST:443") == "https://localhost:443"
+    assert api_server._allowed_cors_origin("null") == "null"
+    assert api_server._allowed_cors_origin("http://localhost/path") is None
+    assert api_server._allowed_cors_origin("http://localhost:70000") is None
+    assert api_server._allowed_cors_origin("http://localhost\r\nX-Injected: yes") is None
+
+
+def test_gui_asset_resolution_cannot_escape_same_prefix_directory(monkeypatch, tmp_path):
+    gui_root = tmp_path / "gui"
+    gui_root.mkdir()
+    index = gui_root / "index.html"
+    index.write_text("safe", encoding="utf-8")
+    sibling = tmp_path / "gui-private"
+    sibling.mkdir()
+    secret = sibling / "secret.html"
+    secret.write_text("private", encoding="utf-8")
+    monkeypatch.setattr(api_server, "GUI_ROOT", gui_root)
+
+    assert api_server._resolve_gui_asset("index.html") == index.resolve()
+    assert api_server._resolve_gui_asset("../gui-private/secret.html") is None
+    assert api_server._resolve_gui_asset(str(secret)) is None
+    assert api_server._gui_content_type(index) == "text/html; charset=utf-8"
 
 
 def test_prediction_and_trading_status_routes_use_light_snapshot(monkeypatch):

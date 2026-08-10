@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ipaddress
 import json
 import os
 import secrets
@@ -45,6 +46,29 @@ _WINDOWS_PROXY_IFACE_KEYWORDS = (
     "zerotier",
     "vpn",
 )
+
+
+def _validated_source_ipv4(bind_ip: str | None) -> str | None:
+    text = str(bind_ip or "").strip()
+    if not text:
+        return None
+    try:
+        address = ipaddress.ip_address(text)
+    except ValueError as exc:
+        raise ValueError(f"invalid source IPv4 address: {text!r}") from exc
+    if not isinstance(address, ipaddress.IPv4Address):
+        raise ValueError("source address must be IPv4")
+    if (
+        address.is_unspecified
+        or address.is_multicast
+        or address.is_reserved
+        or address.is_loopback
+        or address.is_link_local
+    ):
+        raise ValueError("source IPv4 address must identify one local interface")
+    return address.compressed
+
+
 _WINDOWS_POWERSHELL_CANDIDATES = (
     Path("/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"),
     Path("/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe"),
@@ -463,8 +487,11 @@ def _dns_query_a(hostname: str, server: str, *, bind_ip: str | None, timeout: fl
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
     try:
-        if bind_ip:
-            sock.bind((bind_ip, 0))
+        source_ip = _validated_source_ipv4(bind_ip)
+        if source_ip:
+            # The validator rejects 0.0.0.0 and all non-IPv4 source values.
+            # codeql[py/bind-socket-all-network-interfaces]
+            sock.bind((source_ip, 0))
         sock.sendto(query, (server, 53))
         payload, _ = sock.recvfrom(4096)
     finally:
@@ -574,8 +601,11 @@ def _probe_tcp(ip: str, port: int, *, timeout: float, bind_ip: str | None = None
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(timeout)
     try:
-        if bind_ip:
-            sock.bind((bind_ip, 0))
+        source_ip = _validated_source_ipv4(bind_ip)
+        if source_ip:
+            # The validator rejects 0.0.0.0 and all non-IPv4 source values.
+            # codeql[py/bind-socket-all-network-interfaces]
+            sock.bind((source_ip, 0))
         sock.connect((ip, int(port)))
         report["local_address"] = sock.getsockname()[0]
         report["ok"] = True
@@ -633,7 +663,8 @@ class _SourceAddressHTTPAdapter(HTTPAdapter):
 def _build_direct_session(bind_ip: str | None = None) -> requests.Session:
     session = requests.Session()
     session.trust_env = False
-    adapter = _SourceAddressHTTPAdapter(source_address=(bind_ip, 0) if bind_ip else None)
+    source_ip = _validated_source_ipv4(bind_ip)
+    adapter = _SourceAddressHTTPAdapter(source_address=(source_ip, 0) if source_ip else None)
     session.mount("http://", adapter)
     session.mount("https://", adapter)
     session.headers.update({"Connection": "keep-alive"})
