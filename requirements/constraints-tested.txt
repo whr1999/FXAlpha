@@ -6,7 +6,7 @@ Jinja2==3.1.6
 lightgbm==4.6.0
 mcp==1.26.0
 mlflow==3.5.0
-numpy==2.4.3
+numpy==2.4.6
 openai==2.29.0
 pandas==2.3.3
 pyarrow==21.0.0
