@@ -12,7 +12,7 @@ pandas==2.3.3
 pyarrow==21.0.0
 PyYAML==6.0.3
 requests==2.32.5
-scikit-learn==1.8.0
+scikit-learn==1.9.0
 scipy==1.17.1
 tables==3.11.1
 tqdm==4.67.3
