@@ -83,6 +83,10 @@ rollback. Do not delete the old release during the cutover window.
 ## Configuration and state
 
 - Set `FXALPHA_CONFIG_FILE` to use config outside the checkout.
+- Background data, factor-scoring, import, and Orchestrator workers launched as
+  transient user services receive the allowlisted values from `runtime.env`,
+  including `FXALPHA_CONFIG_FILE`. Restart the long-lived service after changing
+  that file; do not put a second `config.yaml` inside an immutable release.
 - If durable data lives outside the release checkout, map the complete path
   set together: raw HDF/metadata/calendar, Qlib, QuantGPT parquet, factor,
   model, `metadata_root`, and trading. Mapping only the large datasets but not

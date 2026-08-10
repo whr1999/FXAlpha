@@ -25,6 +25,7 @@ from typing import Any
 import yaml
 
 from services._base import ServiceResult, err_result, ok_result
+from services.transient_worker_environment import systemd_setenv_args
 from domain.platform_evaluation import EvaluationProfileError, resolve_evaluation_profile
 from storage.factor_registry import FactorRegistry
 from storage.paths import (
@@ -6942,6 +6943,7 @@ except Exception as exc:
                         f"--unit={unit}",
                         f"--property=WorkingDirectory={repo_root}",
                         f"--setenv=PYTHONPATH={env['PYTHONPATH']}",
+                        *systemd_setenv_args(env),
                         sys.executable,
                         str(runner_path),
                         str(input_path),
@@ -7261,6 +7263,7 @@ except Exception as exc:
                         "--property=MemoryAccounting=yes",
                         f"--property=MemoryMax={FACTOR_ORCHESTRATOR_TOOL_WORKER_MEMORY_MAX}",
                         f"--setenv=PYTHONPATH={env['PYTHONPATH']}",
+                        *systemd_setenv_args(env),
                         sys.executable,
                         str(runner_path),
                         str(input_path),
@@ -15876,6 +15879,7 @@ def _start_orchestrator_background(run_id: str, inputs: dict, contract: dict) ->
         "--property=Restart=no",
         "--property=KillMode=control-group",
         f"--property=WorkingDirectory={Path(__file__).resolve().parents[1]}",
+        *systemd_setenv_args(),
         *command,
     ]
     try:

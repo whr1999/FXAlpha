@@ -6623,6 +6623,8 @@ def test_fresh_run_does_not_inherit_stale_recovery_round(monkeypatch, tmp_path):
 def test_background_orchestrator_uses_detached_worker(monkeypatch, tmp_path):
     _, events_file = _redirect_orchestrator(monkeypatch, tmp_path)
     captured = {}
+    config_file = tmp_path / "production-config.yaml"
+    monkeypatch.setenv("FXALPHA_CONFIG_FILE", str(config_file))
 
     def fake_run(command, **kwargs):
         captured["command"] = command
@@ -6633,6 +6635,7 @@ def test_background_orchestrator_uses_detached_worker(monkeypatch, tmp_path):
     worker = svc._start_orchestrator_background("run-live", {"n_rounds": 1}, {"contract_source": "orchestrator"})
 
     assert captured["command"][0:2] == ["systemd-run", "--user"]
+    assert f"--setenv=FXALPHA_CONFIG_FILE={config_file}" in captured["command"]
     assert "orchestrator_worker.py" in " ".join(captured["command"])
     assert captured["command"][captured["command"].index("--run-id") + 1] == "run-live"
     assert captured["command"][captured["command"].index("--worker-unit") + 1].endswith(".service")
