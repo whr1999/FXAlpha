@@ -373,11 +373,17 @@ def _resolve_gui_asset(rel_path: str) -> Path | None:
     relative = Path(rel_path)
     if relative.is_absolute():
         return None
+    # resolve() collapses traversal segments and follows symlinks; relative_to()
+    # below then proves that the resolved path is inside the resolved GUI root.
+    # codeql[py/path-injection]
     candidate = (root / relative).resolve()
     try:
         candidate.relative_to(root)
     except ValueError:
         return None
+    # Only a path that passed the canonical root-containment proof reaches this
+    # filesystem check.
+    # codeql[py/path-injection]
     return candidate if candidate.is_file() else None
 
 
@@ -511,6 +517,9 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_header("Vary", "Accept-Encoding")
         allowed_origin = _allowed_cors_origin(self.headers.get("Origin"))
         if allowed_origin is not None:
+            # The helper accepts a CR/LF-free loopback-origin grammar and
+            # reconstructs the value from parsed scheme, host, and numeric port.
+            # codeql[py/http-response-splitting]
             self.send_header("Access-Control-Allow-Origin", allowed_origin)
             self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
