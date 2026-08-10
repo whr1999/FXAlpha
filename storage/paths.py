@@ -43,15 +43,11 @@ LLM = CONFIG.get("llm", {})
 QUANT_RESEARCH_LLM = LLM.get("quant_research", {})
 
 DEFAULT_DATA_ROOT = PROJECT_ROOT / "data"
+DEFAULT_RUNTIME_ROOT = PROJECT_ROOT / "runtime"
 DEFAULT_THIRD_PARTY_ROOT = PROJECT_ROOT / "third_party"
 DEFAULT_DATA_FOUNDATION_SCRIPT_ROOT = PROJECT_ROOT / "scripts" / "data_foundation"
-DEFAULT_PRODUCTION_RAW_ROOT = DEFAULT_DATA_ROOT / "raw" / "tushare"
-DEFAULT_QUANTGPT_ROOT = DEFAULT_DATA_ROOT / "quantgpt"
-DEFAULT_QLIB_ROOT = DEFAULT_DATA_ROOT / "qlib"
-DEFAULT_FACTOR_DATA_ROOT = DEFAULT_DATA_ROOT / "factors"
-DEFAULT_MODEL_DATA_ROOT = DEFAULT_DATA_ROOT / "model"
-DEFAULT_METADATA_ROOT = DEFAULT_DATA_ROOT / "metadata"
 DEFAULT_QUANTGPT_CODE_ROOT = DEFAULT_THIRD_PARTY_ROOT / "quantgpt"
+DEFAULT_QUANTGPT_DB = DEFAULT_QUANTGPT_CODE_ROOT / "quantgpt.db"
 DEFAULT_QLIB_SOURCE_ROOT = DEFAULT_THIRD_PARTY_ROOT / "qlib"
 
 
@@ -73,53 +69,78 @@ def _rooted_path(value: str | Path) -> Path:
     path = Path(value).expanduser()
     return path if path.is_absolute() else PROJECT_ROOT / path
 
+
+DATA_ROOT = _rooted_path(PATHS.get("data_root", str(DEFAULT_DATA_ROOT)))
+PRODUCTION_RAW_ROOT = DATA_ROOT / "raw" / "tushare"
+QUANTGPT_ROOT = DATA_ROOT / "quantgpt"
+QLIB_DEFAULT_DATA_ROOT = DATA_ROOT / "qlib"
+FACTOR_DEFAULT_DATA_ROOT = DATA_ROOT / "factors"
+MODEL_DEFAULT_DATA_ROOT = DATA_ROOT / "model"
+METADATA_DEFAULT_ROOT = DATA_ROOT / "metadata"
+
+
+def _runtime_path(value: str | Path) -> Path:
+    """Resolve a runtime path against the configured runtime root.
+
+    Existing configurations commonly store values such as
+    ``runtime/model/latest_status.json``.  Strip that compatibility prefix so
+    the same configuration can be moved under an external ``runtime_root``.
+    """
+    path = Path(value).expanduser()
+    if path.is_absolute():
+        return path
+    if path.parts and path.parts[0] == "runtime":
+        path = Path(*path.parts[1:])
+    return RUNTIME_ROOT / path
+
 PRODUCTION_RAW_HDF5 = _rooted_path(
     PATHS.get(
         "production_raw_hdf5",
-        PATHS.get("tushare_hdf5", str(DEFAULT_PRODUCTION_RAW_ROOT / "stock_daily.h5")),
+        PATHS.get("tushare_hdf5", str(PRODUCTION_RAW_ROOT / "stock_daily.h5")),
     )
 ).expanduser()
 PRODUCTION_RAW_METADATA = _rooted_path(
     PATHS.get(
         "production_raw_metadata",
-        PATHS.get("tushare_metadata", str(DEFAULT_PRODUCTION_RAW_ROOT / "metadata.json")),
+        PATHS.get("tushare_metadata", str(PRODUCTION_RAW_ROOT / "metadata.json")),
     )
 ).expanduser()
 PRODUCTION_TRADING_CALENDAR_FILE = _rooted_path(
-    PATHS.get("production_trading_calendar_file", str(DEFAULT_PRODUCTION_RAW_ROOT / "trade_calendar.txt"))
+    PATHS.get("production_trading_calendar_file", str(PRODUCTION_RAW_ROOT / "trade_calendar.txt"))
 ).expanduser()
 PRODUCTION_TRADING_CALENDAR_META = _rooted_path(
-    PATHS.get("production_trading_calendar_meta", str(DEFAULT_PRODUCTION_RAW_ROOT / "trade_calendar_meta.json"))
+    PATHS.get("production_trading_calendar_meta", str(PRODUCTION_RAW_ROOT / "trade_calendar_meta.json"))
 ).expanduser()
 THIRD_PARTY_ROOT = _rooted_path(PATHS.get("third_party_root", str(DEFAULT_THIRD_PARTY_ROOT)))
 QLIB_SOURCE_ROOT = _rooted_path(PATHS.get("qlib_source_root", str(DEFAULT_QLIB_SOURCE_ROOT)))
-QUANTGPT_DATA_DIR = _rooted_path(PATHS.get("quantgpt_data_dir", str(DEFAULT_QUANTGPT_ROOT / "stocks")))
-QUANTGPT_BENCHMARK_DIR = _rooted_path(PATHS.get("quantgpt_benchmark_dir", str(DEFAULT_QUANTGPT_ROOT / "benchmark")))
+QUANTGPT_DATA_DIR = _rooted_path(PATHS.get("quantgpt_data_dir", str(QUANTGPT_ROOT / "stocks")))
+QUANTGPT_BENCHMARK_DIR = _rooted_path(PATHS.get("quantgpt_benchmark_dir", str(QUANTGPT_ROOT / "benchmark")))
 QUANTGPT_CODE_ROOT = _rooted_path(PATHS.get("quantgpt_code_root", str(DEFAULT_QUANTGPT_CODE_ROOT)))
+QUANTGPT_DB = _rooted_path(PATHS.get("quantgpt_db", str(DEFAULT_QUANTGPT_DB))).expanduser()
 QUANTGPT_RESEARCH_NOTES_DIR = _rooted_path(
-    PATHS.get("quantgpt_research_notes_dir", str(DEFAULT_QUANTGPT_CODE_ROOT / "research_notes"))
+    PATHS.get("quantgpt_research_notes_dir", str(QUANTGPT_CODE_ROOT / "research_notes"))
 ).expanduser()
-QLIB_DATA_ROOT = _rooted_path(PATHS.get("qlib_data_root", str(DEFAULT_QLIB_ROOT)))
-FACTOR_DATA_ROOT = _rooted_path(PATHS.get("factor_data_root", str(DEFAULT_FACTOR_DATA_ROOT)))
+QLIB_DATA_ROOT = _rooted_path(PATHS.get("qlib_data_root", str(QLIB_DEFAULT_DATA_ROOT)))
+FACTOR_DATA_ROOT = _rooted_path(PATHS.get("factor_data_root", str(FACTOR_DEFAULT_DATA_ROOT)))
 FACTOR_PARQUET_DIR = _rooted_path(
-    PATHS.get("factor_parquet_dir", str(DEFAULT_FACTOR_DATA_ROOT / "parquet"))
+    PATHS.get("factor_parquet_dir", str(FACTOR_DEFAULT_DATA_ROOT / "parquet"))
 ).expanduser()
 FACTOR_ACTIVE_ADOPTED_VALUES_FILE = _rooted_path(
-    PATHS.get("factor_active_adopted_values_file", str(DEFAULT_FACTOR_DATA_ROOT / "active_adopted_factor_values.parquet"))
+    PATHS.get("factor_active_adopted_values_file", str(FACTOR_DEFAULT_DATA_ROOT / "active_adopted_factor_values.parquet"))
 ).expanduser()
 # Compatibility aliases. FXAlpha and embedded QuantGPT share one canonical
 # active-factor value store; callers must not create independent wide copies.
 FACTOR_ADOPTED_VALUES_FILE = FACTOR_ACTIVE_ADOPTED_VALUES_FILE
 QUANTGPT_ADOPTED_VALUES_FILE = FACTOR_ACTIVE_ADOPTED_VALUES_FILE
 FACTOR_ACTIVE_ADOPTED_VALUES_MANIFEST = _rooted_path(
-    PATHS.get("factor_active_adopted_values_manifest", str(DEFAULT_FACTOR_DATA_ROOT / "active_adopted_factor_values.manifest.json"))
+    PATHS.get("factor_active_adopted_values_manifest", str(FACTOR_DEFAULT_DATA_ROOT / "active_adopted_factor_values.manifest.json"))
 ).expanduser()
 FACTOR_REGISTRY_DB = _rooted_path(
-    PATHS.get("factor_registry_db", str(DEFAULT_FACTOR_DATA_ROOT / "factor_registry.db"))
+    PATHS.get("factor_registry_db", str(FACTOR_DEFAULT_DATA_ROOT / "factor_registry.db"))
 ).expanduser()
-MODEL_DATA_ROOT = _rooted_path(PATHS.get("model_data_root", str(DEFAULT_MODEL_DATA_ROOT)))
+MODEL_DATA_ROOT = _rooted_path(PATHS.get("model_data_root", str(MODEL_DEFAULT_DATA_ROOT)))
 MODEL_FEATURES_ROOT = _rooted_path(
-    PATHS.get("model_features_root", str(DEFAULT_MODEL_DATA_ROOT / "features"))
+    PATHS.get("model_features_root", str(MODEL_DEFAULT_DATA_ROOT / "features"))
 ).expanduser()
 MODEL_FEATURE_SETS_ROOT = _rooted_path(
     PATHS.get("model_feature_sets_root", str(MODEL_FEATURES_ROOT / "feature_sets"))
@@ -134,9 +155,9 @@ MODEL_ACTIVE_FEATURE_MANIFEST = _rooted_path(
     PATHS.get("model_active_feature_manifest", str(MODEL_ACTIVE_FEATURE_DIR / "manifest.json"))
 ).expanduser()
 MODEL_REGISTRY_DB = _rooted_path(
-    PATHS.get("model_registry_db", str(DEFAULT_MODEL_DATA_ROOT / "model_registry.db"))
+    PATHS.get("model_registry_db", str(MODEL_DEFAULT_DATA_ROOT / "model_registry.db"))
 ).expanduser()
-METADATA_ROOT = _rooted_path(PATHS.get("metadata_root", str(DEFAULT_METADATA_ROOT)))
+METADATA_ROOT = _rooted_path(PATHS.get("metadata_root", str(METADATA_DEFAULT_ROOT)))
 STOCK_IDENTITY_CACHE = _rooted_path(
     PATHS.get("stock_identity_cache", str(METADATA_ROOT / "stock_identity_map.parquet"))
 ).expanduser()
@@ -155,20 +176,20 @@ QLIB_STOCK_META = QLIB_DATA_ROOT / "stock_converter_meta.json"
 QLIB_INDEX_META = QLIB_DATA_ROOT / "index_converter_meta.json"
 QLIB_CALENDAR_FILE = QLIB_DATA_ROOT / "calendars" / "day.txt"
 
-RUNTIME_ROOT = PROJECT_ROOT / "runtime"
+RUNTIME_ROOT = _rooted_path(PATHS.get("runtime_root", str(DEFAULT_RUNTIME_ROOT)))
 DATA_FOUNDATION_ROOT = RUNTIME_ROOT / "data_foundation"
-LATEST_STATUS_FILE = PROJECT_ROOT / DATA_FOUNDATION.get("latest_status_file", "runtime/data_foundation/latest_status.json")
-CURRENT_PRODUCTION_DATASET_FILE = PROJECT_ROOT / DATA_FOUNDATION.get(
+LATEST_STATUS_FILE = _runtime_path(DATA_FOUNDATION.get("latest_status_file", "runtime/data_foundation/latest_status.json"))
+CURRENT_PRODUCTION_DATASET_FILE = _runtime_path(DATA_FOUNDATION.get(
     "current_production_dataset_file",
     "runtime/data_foundation/CURRENT_PRODUCTION_DATASET.json",
-)
+))
 FACTOR_RESEARCH_ROOT = RUNTIME_ROOT / "factor_research"
 MODEL_RUNTIME_ROOT = RUNTIME_ROOT / "model"
 MODEL_RUNS_ROOT = MODEL_RUNTIME_ROOT / "runs"
-LATEST_MODEL_STATUS_FILE = PROJECT_ROOT / MODEL.get(
+LATEST_MODEL_STATUS_FILE = _runtime_path(MODEL.get(
     "latest_status_file",
     "runtime/model/latest_status.json",
-)
+))
 TRADING_RUNTIME_ROOT = RUNTIME_ROOT / 'trading'
 PREDICTION_RUNTIME_ROOT = TRADING_RUNTIME_ROOT / 'prediction'
 PREDICTION_FEATURE_RUNTIME_ROOT = TRADING_RUNTIME_ROOT / 'prediction_features'
@@ -182,15 +203,15 @@ TRADING_RISK_LATEST_FILE = TRADING_RUNTIME_ROOT / 'latest_risk_decision.json'
 LATEST_PREDICTION_STATUS_FILE = TRADING_RUNTIME_ROOT / 'latest_prediction_status.json'
 DAILY_OPS_RUNTIME_ROOT = RUNTIME_ROOT / 'daily_ops'
 LATEST_DAILY_OPS_STATUS_FILE = DAILY_OPS_RUNTIME_ROOT / 'latest_status.json'
-TRADING_DATA_ROOT = _rooted_path(PATHS.get("trading_data_root", str(DEFAULT_DATA_ROOT / "trading")))
+TRADING_DATA_ROOT = _rooted_path(PATHS.get("trading_data_root", str(DATA_ROOT / "trading")))
 TRADING_EXECUTION_LOG_DB = _rooted_path(
     PATHS.get("trading_execution_log_db", str(TRADING_DATA_ROOT / "execution_log.db"))
 ).expanduser()
-ACTIVE_MODEL_FEATURE_SET_FILE = PROJECT_ROOT / MODEL.get(
+ACTIVE_MODEL_FEATURE_SET_FILE = _runtime_path(MODEL.get(
     "active_feature_set_file",
     "runtime/model/active_feature_set.json",
-)
-LATEST_PIPELINE_STATUS_FILE = PROJECT_ROOT / PIPELINE.get("latest_status_file", "runtime/pipeline/latest_status.json")
+))
+LATEST_PIPELINE_STATUS_FILE = _runtime_path(PIPELINE.get("latest_status_file", "runtime/pipeline/latest_status.json"))
 PIPELINE_DEFAULT_FACTOR_TARGET = int(PIPELINE.get("default_factor_target", 10))
 PIPELINE_DEFAULT_FACTOR_SESSIONS = int(PIPELINE.get("default_factor_sessions", 3))
 PIPELINE_DEFAULT_MODEL_FAMILY = str(PIPELINE.get("default_model_family", MODEL.get("default_family", "lgbm")))

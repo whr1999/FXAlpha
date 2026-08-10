@@ -23,6 +23,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from domain.factor_research import quality_gate  # noqa: E402
 from storage.factor_registry import FactorRegistry  # noqa: E402
+from storage.paths import RUNTIME_ROOT  # noqa: E402
 
 
 def _utc_now() -> str:
@@ -159,7 +160,7 @@ def _backup_registry(registry: FactorRegistry) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--rolling-json", required=True, help="Output JSON from run_active_rolling_audit.py")
-    parser.add_argument("--output", default=str(PROJECT_ROOT / "runtime" / "factor_research" / "active_rolling_rescore_apply.json"))
+    parser.add_argument("--output", default=str(RUNTIME_ROOT / "factor_research" / "active_rolling_rescore_apply.json"))
     parser.add_argument("--write", action="store_true", help="Persist recomputed metadata to factor_registry.db")
     parser.add_argument("--no-backup", action="store_true", help="Skip SQLite backup when --write is used")
     args = parser.parse_args()

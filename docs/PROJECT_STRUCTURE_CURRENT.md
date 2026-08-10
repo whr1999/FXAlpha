@@ -20,10 +20,14 @@ operator-owned data, and runtime evidence.
 | `gui/` | Static operator console |
 | `tests/` | source-contract and regression tests |
 | `deploy/systemd/` | operator-reviewed user-service templates |
+| `docs/` | current public product, workflow, architecture, and operations contracts |
 
 Generated `data/`, `runtime/`, `artifacts/`, `mlruns/`, logs, databases, local
 configuration, and virtual environments are excluded from Git. vn.py has no
 source or runtime ownership in the current structure.
 
 See [`ARCHITECTURE.md`](ARCHITECTURE.md) for system flow and
-[`THIRD_PARTY_FORKS.md`](THIRD_PARTY_FORKS.md) for dependency ownership.
+[`THIRD_PARTY_FORKS.md`](THIRD_PARTY_FORKS.md) for dependency ownership. The
+host-level separation of immutable releases, durable data, runtime evidence,
+configuration, backups, and archives is normative in
+[`PATH_LAYOUT.md`](PATH_LAYOUT.md).

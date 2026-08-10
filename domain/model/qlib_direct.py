@@ -9,7 +9,7 @@ from typing import Any
 
 import pandas as pd
 
-from storage.paths import MODEL_DEFAULT_TEST_MONTHS, MODEL_DEFAULT_VALID_MONTHS, QLIB_DATA_ROOT
+from storage.paths import MODEL_DEFAULT_TEST_MONTHS, MODEL_DEFAULT_VALID_MONTHS, PROJECT_ROOT, QLIB_DATA_ROOT, QLIB_SOURCE_ROOT
 
 from .contracts import (
     DEFAULT_PORTFOLIO,
@@ -20,12 +20,10 @@ from .training_contract import model_training_contract
 
 
 def _ensure_qlib0627_path() -> None:
-    root = Path(__file__).resolve().parents[2]
-    qlib_source = root / "external" / "qlib0627" / "qlib"
-    if qlib_source.exists() and str(qlib_source) not in sys.path:
-        sys.path.insert(0, str(qlib_source))
-    if str(root) not in sys.path:
-        sys.path.insert(0, str(root))
+    if QLIB_SOURCE_ROOT.exists() and str(QLIB_SOURCE_ROOT) not in sys.path:
+        sys.path.insert(0, str(QLIB_SOURCE_ROOT))
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def _jsonable(value: Any) -> Any:

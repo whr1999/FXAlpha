@@ -2,6 +2,10 @@
 
 `storage/paths.py` is the code authority. Relative configuration values are
 resolved against the repository root, not the caller's working directory.
+`paths.data_root` is the common root for durable business data and
+`paths.runtime_root` is the common root for mutable run evidence. In production
+both should be absolute directories outside the immutable release checkout.
+Specific legacy path keys remain higher-priority compatibility overrides.
 
 | Path | Contract |
 | --- | --- |
@@ -12,6 +16,7 @@ resolved against the repository root, not the caller's working directory.
 | `data/model/` | model registry and feature snapshots |
 | `data/trading/` | execution/account registry |
 | `runtime/data_foundation/` | staged packages, production pointer, audits |
+| `runtime/quantgpt/quantgpt.db` | QuantGPT task ledger when configured for release deployment |
 | `runtime/factor_research/` | run journals, events, traces, locks |
 | `runtime/model/jobs/` | managed job metadata and worker logs |
 | `runtime/model/rolling/` | rolling-campaign evidence |
@@ -24,4 +29,11 @@ Important files include `jobs/<job_id>.log`,
 All paths in this document are local state and Git-ignored. Operators must back
 up durable registries separately and must not manually delete active locks or
 staged packages. Third-party source is under `third_party/`, not `data/` or
-`runtime/`.
+`runtime/`. QuantGPT task state is selected by `paths.quantgpt_db` and the
+matching `DATABASE_URL`; report output is externalized with
+`QUANTGPT_REPORTS_DIR`. None of these mutable assets may be written into the
+pinned submodule in a release deployment.
+
+The complete production topology, ownership table, configuration precedence,
+and migration order are defined in [`PATH_LAYOUT.md`](PATH_LAYOUT.md) and
+[`PATH_LAYOUT.zh-CN.md`](PATH_LAYOUT.zh-CN.md).

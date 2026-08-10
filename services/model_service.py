@@ -12,7 +12,7 @@ from typing import Any
 from services._base import ServiceResult, err_result, ok_result
 from services.factor_active_values_service import factor_active_values_status
 from storage.model_registry import ModelRegistry
-from storage.paths import MODEL_EVALUATION_MODE, PROJECT_ROOT
+from storage.paths import MODEL_EVALUATION_MODE, MODEL_RUNTIME_ROOT, PROJECT_ROOT
 
 from domain.data_foundation.stock_metadata import load_stock_identity_map, security_name_for_instrument, stock_identity_cache_status
 from domain.model.context import build_context_pack, record_mcp_context
@@ -3154,7 +3154,7 @@ def model_orchestrator_start(
         )
         if not claimed:
             return ok_result(inputs=launch_payload, outputs={"status": "already_running", "active_job": claimed_job})
-        log_dir = PROJECT_ROOT / "runtime" / "model" / "jobs"
+        log_dir = MODEL_RUNTIME_ROOT / "jobs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / f"{job_id}.log"
         command = [
@@ -3236,7 +3236,7 @@ def model_job_resume(job_id: str) -> ServiceResult:
     )
     if not claimed:
         return ok_result(outputs={"status": "already_running", "active_job": active})
-    log_dir = PROJECT_ROOT / "runtime" / "model" / "jobs"
+    log_dir = MODEL_RUNTIME_ROOT / "jobs"
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / f"{new_job_id}.log"
     evaluation_mode = str(payload.get("evaluation_mode") or "research")

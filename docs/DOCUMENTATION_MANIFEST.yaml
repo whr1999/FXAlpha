@@ -1,0 +1,68 @@
+schema_version: fxalpha_documentation_manifest_v1
+updated: 2026-08-10
+scope: top-level Markdown documents under docs plus repository entrypoints
+statuses:
+  current: normative product, architecture, or operations guidance
+  release: publication, deployment, or release evidence
+  historical: retained context that must not drive current operations
+groups:
+  entrypoints:
+    status: current
+    documents:
+      - ../README.md
+      - ../README.zh-CN.md
+      - DOCUMENTATION_INDEX_CURRENT.md
+      - OPERATIONS_INDEX.md
+      - OPERATIONS_INDEX.zh-CN.md
+      - USER_GUIDE.md
+      - USER_GUIDE.zh-CN.md
+      - BUSINESS_WORKFLOWS.md
+      - BUSINESS_WORKFLOWS.zh-CN.md
+      - ARCHITECTURE.md
+  production_contracts:
+    status: current
+    documents:
+      - CODEX_ENGINEERING_GUARDRAILS.md
+      - DATA_FOUNDATION_DAILY_RUNBOOK_CURRENT.md
+      - DATA_FOUNDATION_DATASET_REGISTRY_CURRENT.md
+      - DATA_FOUNDATION_DIRECT_NETWORK_AND_QUALITY_POLICY_CURRENT.md
+      - DATA_FOUNDATION_TUSHARE_DIRECT_NETWORK_POLICY_CURRENT.md
+      - DATA_FOUNDATION_TUSHARE_FIELD_DICTIONARY_CURRENT.md
+      - DATA_FOUNDATION_TUSHARE_REBUILD_RUNBOOK_CURRENT.md
+      - DATA_FOUNDATION_WORKFLOW_CURRENT.md
+      - DATA_TRADING_OPERATION_CONTRACT_CURRENT.md
+      - FACTOR_RESEARCH_OPERATIONS.md
+      - LLM_INTEGRATION.md
+      - MODEL_NAMING_CONTRACT.md
+      - MODEL_RESEARCH_PRETEST_CHECKLIST_CURRENT.md
+      - MODEL_RESEARCH_PRODUCTION_RUNBOOK.md
+      - MODEL_RESEARCH_WORKFLOW_CURRENT.md
+      - PLATFORM_EVALUATION_MODES.md
+      - PLATFORM_GOVERNANCE_MCP_CURRENT.md
+      - PLATFORM_OPS_RUNBOOK.md
+      - PATH_LAYOUT.md
+      - PATH_LAYOUT.zh-CN.md
+      - PRODUCTION_MULTI_MODEL_PAPER_TRADING_CURRENT.md
+      - PROJECT_STRUCTURE_CURRENT.md
+      - QLIB_LIMIT_TRADING_CONTRACT_CURRENT.md
+      - RUNTIME_AND_DATA_PATHS_CURRENT.md
+      - RUNTIME_AUDIT_CURRENT.md
+      - TRADING_RECOMMENDATION_RUNBOOK_CURRENT.md
+  release_and_publication:
+    status: release
+    documents:
+      - GITHUB_PUBLICATION_READINESS.md
+      - GITHUB_UPLOAD_RUNBOOK.md
+      - LICENSE_POLICY_DECISION.md
+      - LOCAL_DEPLOYMENT.md
+      - SCREENSHOTS.md
+      - SCREENSHOTS.zh-CN.md
+      - THIRD_PARTY_FORKS.md
+      - VERIFICATION_REPORT_20260810.md
+      - VERIFICATION_REPORT_20260810.zh-CN.md
+      - VNPY_RETIREMENT.md
+  historical_context:
+    status: historical
+    documents:
+      - MODEL_REBUILD_RUNBOOK.md
+      - WORKSPACE_AUDIT_20260620.md

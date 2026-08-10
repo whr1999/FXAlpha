@@ -32,7 +32,30 @@ def test_config_example_and_external_override_contract():
     assert (ROOT / "config.example.yaml").is_file()
     assert "FXALPHA_CONFIG_FILE" in paths_source
     assert "CONFIG_EXAMPLE_FILE" in paths_source
+    assert 'PATHS.get("data_root"' in paths_source
+    assert 'PATHS.get("runtime_root"' in paths_source
+    assert 'PATHS.get("quantgpt_db"' in paths_source
+    assert "QLIB_SOURCE_ROOT" in paths_source
     assert not (ROOT / "config.yaml").exists()
+
+
+def test_immutable_release_unit_set_includes_services_target_and_timers():
+    unit_root = ROOT / "deploy" / "systemd" / "release"
+    expected = {
+        "fxalpha-api-18081.service",
+        "fxalpha-quantgpt-8003.service",
+        "fxalpha-data-daily.service",
+        "fxalpha-paper-fleet-daily.service",
+        "fxalpha-factor-stack.target",
+        "fxalpha-data-daily.timer",
+        "fxalpha-paper-fleet-daily.timer",
+    }
+
+    assert expected <= {path.name for path in unit_root.iterdir()}
+    for timer in ("fxalpha-data-daily.timer", "fxalpha-paper-fleet-daily.timer"):
+        text = (unit_root / timer).read_text(encoding="utf-8")
+        assert "Persistent=true" in text
+        assert "WantedBy=timers.target" in text
 
 
 def test_bilingual_readmes_route_new_users_to_operational_guidance():

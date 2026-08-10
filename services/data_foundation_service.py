@@ -14,6 +14,7 @@ from typing import Any
 from uuid import uuid4
 
 from services._base import ServiceResult, err_result, ok_result
+from services.transient_worker_environment import systemd_setenv_args
 from domain.data_foundation.runtime_io import atomic_write_json
 from domain.data_foundation.tushare_daily import (
     DAILY_STATUS_FILE,
@@ -597,6 +598,7 @@ def _launch_data_job_worker(job: dict[str, Any]) -> dict[str, Any]:
             "--property=KillMode=control-group",
             f"--property=WorkingDirectory={Path(__file__).resolve().parents[1]}",
             f"--setenv=PYTHONPATH={Path(__file__).resolve().parents[1]}",
+            *systemd_setenv_args(),
             *command,
         ]
         completed = subprocess.run(

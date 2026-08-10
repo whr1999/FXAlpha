@@ -5,7 +5,7 @@ never vendors or silently edits their source.
 
 | Component | Official upstream | FXAlpha fork target | Pin in this candidate | Purpose |
 | --- | --- | --- | --- | --- |
-| QuantGPT | `Miasyster/QuantGPT` | `whr1999/QuantGPT` | `024818abcf76b35f0a8282f9a212c2309716defd` | Factor engine and MCP integration |
+| QuantGPT | `Miasyster/QuantGPT` | `whr1999/QuantGPT` | `896e7a1eb97bf1dea2dfa1de535fcf387d7600ef` | Factor engine, MCP integration, and external runtime reports |
 | Qlib | `microsoft/qlib` | `whr1999/qlib` | `d5379c520f66a39953bad76234a7019a72796fd0` | Training, backtest, exchange semantics |
 | Tushare | `waditu/tushare` | `whr1999/tushare` | `bc5388dcb339ce7e11515cab5cb6087b3724e74b` | Data SDK |
 
@@ -17,7 +17,7 @@ blockers is [`third_party/components.lock.json`](../third_party/components.lock.
 1. Create a real GitHub fork from the official upstream.
 2. Preserve an `upstream` remote pointing to the official repository and an
    `origin` remote pointing to `whr1999`.
-3. Put FXAlpha changes on `codex/fxalpha-public`; do not rewrite upstream tags.
+3. Put FXAlpha changes on a reviewed FXAlpha-owned `codex/*` branch; do not rewrite upstream tags.
 4. Run component tests, license review, secret scan, and dependency audit.
 5. Push the fork branch, then update the main repository's submodule pin in a
    separate reviewed commit.
@@ -33,7 +33,8 @@ reviewed changes that must update both the Gitlink and
 
 - QuantGPT is a local clone of the deployed integration with secure defaults,
   portable FXAlpha root/config discovery, loopback binding, restricted
-  development CORS, and no operator-specific absolute paths.
+  development CORS, no operator-specific absolute paths, and configurable
+  `QUANTGPT_REPORTS_DIR` for runtime report isolation.
 - Qlib is an unchanged pinned upstream checkout.
 - Tushare is a byte-verified overlay of all 74 source files from the official
   `tushare-1.4.29-py3-none-any.whl` release. The wheel SHA-256 is

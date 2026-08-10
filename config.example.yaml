@@ -1,27 +1,17 @@
 paths:
+  # One switch relocates all durable market, factor, model, and trading data.
+  # Individual *_root or *_file keys remain supported as advanced overrides.
+  data_root: "data"
+  # Keep mutable runtime state outside an immutable release by overriding this
+  # with an absolute production or shadow path.
+  runtime_root: "runtime"
   third_party_root: "third_party"
-  production_raw_hdf5: "data/raw/tushare/stock_daily.h5"
-  production_raw_metadata: "data/raw/tushare/metadata.json"
-  production_trading_calendar_file: "data/raw/tushare/trade_calendar.txt"
-  production_trading_calendar_meta: "data/raw/tushare/trade_calendar_meta.json"
-  quantgpt_data_dir: "data/quantgpt/stocks"
-  quantgpt_benchmark_dir: "data/quantgpt/benchmark"
+  # Production should place this SQLite database outside the release tree and
+  # set DATABASE_URL to the same absolute file in runtime.env.
+  quantgpt_db: "runtime/quantgpt/quantgpt.db"
+  quantgpt_research_notes_dir: "runtime/quantgpt/research_notes"
   quantgpt_code_root: "third_party/quantgpt"
   qlib_source_root: "third_party/qlib"
-  qlib_data_root: "data/qlib"
-  metadata_root: "data/metadata"
-  factor_data_root: "data/factors"
-  factor_parquet_dir: "data/factors/parquet"
-  factor_registry_db: "data/factors/factor_registry.db"
-  model_data_root: "data/model"
-  model_features_root: "data/model/features"
-  model_feature_sets_root: "data/model/features/feature_sets"
-  model_active_feature_dir: "data/model/features/active"
-  model_active_feature_file: "data/model/features/active/combined_factors_df.parquet"
-  model_active_feature_manifest: "data/model/features/active/manifest.json"
-  model_registry_db: "data/model/model_registry.db"
-  trading_data_root: "data/trading"
-  trading_execution_log_db: "data/trading/execution_log.db"
 
 # Platform-wide evaluation intent. The runtime state file selects only the
 # default for newly-created tasks; every task persists the resolved profile.
