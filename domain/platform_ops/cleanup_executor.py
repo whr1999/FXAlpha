@@ -495,7 +495,13 @@ def _collect_runtime_test_tmp(*, profile: str, now: datetime, days: int) -> list
                     protected_reason=blocked_reason,
                 )
             )
-        for current in sorted(root.glob("pytest-of-*/pytest-current")):
+        # Python 3.11's pathlib glob can omit a broken symlink when the
+        # symlink is the final path component. Enumerate the live parent
+        # directories and address the well-known link directly so cleanup is
+        # deterministic across supported Python versions.
+        session_roots = sorted(path for path in root.glob("pytest-of-*") if path.is_dir())
+        for session_root in session_roots:
+            current = session_root / "pytest-current"
             if current.is_symlink() and not current.exists():
                 candidates.append(
                     _candidate(
