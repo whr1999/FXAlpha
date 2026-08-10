@@ -41,6 +41,8 @@ execute 和 systemd 切换，都必须先确认对应 lane 没有活动任务或
   `FXALPHA_CONFIG_FILE`）；修改该文件后应重启长驻服务，不要在不可变
   release 内另放一份生产配置。
 - 生产数据集指针以及因子、模型、交易数据库是业务权威源；GUI 是投影，不是第二份状态。
+- release 切换必须把四个 service、一个 target 和两个 timer 当成同一套单元安装；
+  只有业务健康检查通过后才重新启动 timer，不能让 timer 定义继续依赖旧 checkout。
 
 ## 故障与回滚顺序
 

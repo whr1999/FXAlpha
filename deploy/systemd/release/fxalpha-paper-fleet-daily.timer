@@ -1,0 +1,12 @@
+[Unit]
+Description=Fallback check for FXAlpha release paper fleet Tuesday through Saturday
+
+[Timer]
+OnCalendar=Tue..Sat *-*-* 07:30:00 Asia/Shanghai
+OnStartupSec=10min
+Persistent=true
+AccuracySec=1min
+Unit=fxalpha-paper-fleet-daily.service
+
+[Install]
+WantedBy=timers.target

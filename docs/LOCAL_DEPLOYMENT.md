@@ -73,6 +73,11 @@ absolute path), `paths.quantgpt_db` to the external task ledger, and must map
 all durable data roots explicitly. `DATABASE_URL` in `runtime.env` must select
 the same QuantGPT database file.
 
+Install the four release services, the stack target, and both timer files as
+one versioned unit set. Enable the timers only after the API, QuantGPT, and all
+business-lane checks pass. A release is incomplete if its services are updated
+while an older checkout still owns either timer definition.
+
 Create a new release without changing the live symlink, build its `.venv`, run
 tests, then start shadow processes on QuantGPT `8004` and API `18082` with an
 independent runtime and copied SQLite state. Only after every lane is ready may

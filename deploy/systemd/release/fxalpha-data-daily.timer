@@ -1,0 +1,12 @@
+[Unit]
+Description=Run FXAlpha release data-foundation daily update Tuesday through Saturday
+
+[Timer]
+OnCalendar=Tue..Sat *-*-* 02:00:00 Asia/Shanghai
+OnStartupSec=5min
+Persistent=true
+AccuracySec=1min
+Unit=fxalpha-data-daily.service
+
+[Install]
+WantedBy=timers.target
