@@ -1,4 +1,7 @@
 paths:
+  # Keep mutable runtime state outside an immutable release by overriding this
+  # with an absolute production or shadow path.
+  runtime_root: "runtime"
   third_party_root: "third_party"
   production_raw_hdf5: "data/raw/tushare/stock_daily.h5"
   production_raw_metadata: "data/raw/tushare/metadata.json"

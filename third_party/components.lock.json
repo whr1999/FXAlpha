@@ -8,7 +8,7 @@
       "path": "third_party/quantgpt",
       "upstream_url": "https://github.com/Miasyster/QuantGPT.git",
       "fork_url": "https://github.com/whr1999/QuantGPT.git",
-      "pin": "024818abcf76b35f0a8282f9a212c2309716defd",
+      "pin": "896e7a1eb97bf1dea2dfa1de535fcf387d7600ef",
       "upstream_base": "76e5ad859af0c520dea942bd8174756303b23291",
       "source_kind": "git",
       "publication_blocker": null

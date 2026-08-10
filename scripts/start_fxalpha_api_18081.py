@@ -7,14 +7,16 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-RUNTIME_TMP = REPO_ROOT / "runtime" / "tmp"
-SERVICE_RUNTIME = REPO_ROOT / "runtime" / "api_logs"
+sys.path.insert(0, str(REPO_ROOT))
+
+from storage.paths import RUNTIME_ROOT
+
+RUNTIME_TMP = RUNTIME_ROOT / "tmp"
+SERVICE_RUNTIME = RUNTIME_ROOT / "api_logs"
 PID_FILE = SERVICE_RUNTIME / "fxalpha_api_18081.pid"
 RUNTIME_TMP.mkdir(parents=True, exist_ok=True)
 for _tmp_key in ("TMPDIR", "TEMP", "TMP"):
     os.environ[_tmp_key] = str(RUNTIME_TMP)
-
-sys.path.insert(0, str(REPO_ROOT))
 
 from api_server import start_api
 

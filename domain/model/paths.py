@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from storage.paths import PROJECT_ROOT
+from storage.paths import MODEL_RUNTIME_ROOT as PLATFORM_MODEL_RUNTIME_ROOT
+from storage.paths import QLIB_SOURCE_ROOT
 
 
-MODEL_RUNTIME_ROOT = PROJECT_ROOT / "runtime" / "model"
+MODEL_RUNTIME_ROOT = PLATFORM_MODEL_RUNTIME_ROOT
 MODEL_JOBS_DB = MODEL_RUNTIME_ROOT / "jobs.sqlite"
 MODEL_RESEARCH_STEPS = MODEL_RUNTIME_ROOT / "research_steps" / "current.jsonl"
 MODEL_CONTEXT_SNAPSHOTS = MODEL_RUNTIME_ROOT / "context_snapshots"
@@ -17,7 +18,9 @@ MODEL_ACTIVE_PRODUCTION = MODEL_RUNTIME_ROOT / "active_production_model.json"
 MODEL_ROLLING_ROOT = MODEL_RUNTIME_ROOT / "rolling"
 MODEL_MANUAL_PROMOTION_AUDIT = MODEL_RUNTIME_ROOT / "manual_promotion_audit" / "current.jsonl"
 
-QLIB0627_ROOT = PROJECT_ROOT / "external" / "qlib0627" / "qlib"
+# Compatibility alias retained for existing model manifests and callers.  New
+# code resolves the pinned source from ``paths.qlib_source_root``.
+QLIB0627_ROOT = QLIB_SOURCE_ROOT
 
 
 def ensure_model_dirs(root: Path | None = None) -> dict[str, Path]:

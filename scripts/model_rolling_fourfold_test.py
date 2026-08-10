@@ -19,11 +19,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from domain.model.contracts import DEFAULT_PORTFOLIO, default_r1_experiment
 from domain.model.qlib_direct import _risk_value, _run_backtest, run_direct_qlib_seed
+from storage.paths import MODEL_FEATURE_SETS_ROOT, MODEL_RUNTIME_ROOT, QLIB_DATA_ROOT
 
 
-ACTIVE_FEATURE_SET = PROJECT_ROOT / "runtime" / "model" / "active_feature_set.json"
-OUT_ROOT = PROJECT_ROOT / "runtime" / "model" / "rolling_diagnostics"
-CALENDAR_FILE = PROJECT_ROOT / "data" / "qlib" / "calendars" / "day.txt"
+ACTIVE_FEATURE_SET = MODEL_RUNTIME_ROOT / "active_feature_set.json"
+OUT_ROOT = MODEL_RUNTIME_ROOT / "rolling_diagnostics"
+CALENDAR_FILE = QLIB_DATA_ROOT / "calendars" / "day.txt"
 SEED = 42
 
 
@@ -122,7 +123,9 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _qlib_source_identity() -> dict[str, Any]:
-    root = PROJECT_ROOT / "external" / "qlib0627" / "qlib"
+    from storage.paths import QLIB_SOURCE_ROOT
+
+    root = QLIB_SOURCE_ROOT
     payload: dict[str, Any] = {"source_root": str(root)}
     try:
         payload["git_commit"] = subprocess.check_output(
@@ -428,13 +431,13 @@ def main() -> None:
     if feature_set_id == str(active.get("feature_set_id") or ""):
         feature_manifest = active
     else:
-        manifest_path = PROJECT_ROOT / "data" / "model" / "features" / "feature_sets" / feature_set_id / "manifest.json"
+        manifest_path = MODEL_FEATURE_SETS_ROOT / feature_set_id / "manifest.json"
         if not manifest_path.exists():
             raise FileNotFoundError(manifest_path)
         feature_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     feature_path = Path(str(feature_manifest.get("combined_factors_file") or feature_manifest.get("combined_file") or ""))
     if not feature_path.is_absolute():
-        feature_path = PROJECT_ROOT / "data" / "model" / "features" / "feature_sets" / feature_set_id / "combined_factors_df.parquet"
+        feature_path = MODEL_FEATURE_SETS_ROOT / feature_set_id / "combined_factors_df.parquet"
     if not feature_path.exists():
         raise FileNotFoundError(feature_path)
     run_id = args.run_id or datetime.now().strftime(f"wf4_all33_seed{int(args.seed)}_%Y%m%d_%H%M%S")

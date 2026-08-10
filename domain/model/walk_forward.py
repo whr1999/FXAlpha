@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from storage.model_registry import ModelRegistry
-from storage.paths import MODEL_ROLLING, PROJECT_ROOT
+from storage.paths import MODEL_ROLLING, MODEL_RUNTIME_ROOT, PROJECT_ROOT
 
 from .contracts import DEFAULT_PORTFOLIO, MODEL_SYSTEM_VERSION, rolling_contract, utc_now
 from .rolling_scoring import score_rolling_campaign, score_rolling_seed
@@ -16,7 +16,7 @@ from .registry_lineage import registry_lineage
 from .state_store import ModelStateStore
 
 
-ROLLING_ROOT = PROJECT_ROOT / "runtime" / "model" / "rolling"
+ROLLING_ROOT = MODEL_RUNTIME_ROOT / "rolling"
 SeedRunner = Callable[[int, str, str, str], dict[str, Any]]
 
 
@@ -53,7 +53,7 @@ def _default_seed_runner(seed: int, campaign_id: str, feature_set_id: str, sourc
             "stdout_tail": str(exc.stdout or "")[-4000:],
             "stderr_tail": str(exc.stderr or "")[-4000:],
         }
-    result_path = PROJECT_ROOT / "runtime" / "model" / "rolling_diagnostics" / run_id / "result.json"
+    result_path = MODEL_RUNTIME_ROOT / "rolling_diagnostics" / run_id / "result.json"
     if proc.returncode != 0 or not result_path.exists():
         return {
             "status": "failed",

@@ -2,6 +2,8 @@
 
 `storage/paths.py` is the code authority. Relative configuration values are
 resolved against the repository root, not the caller's working directory.
+`paths.runtime_root` is the single root for mutable run evidence. In production
+it should be an absolute directory outside the immutable release checkout.
 
 | Path | Contract |
 | --- | --- |
@@ -24,4 +26,5 @@ Important files include `jobs/<job_id>.log`,
 All paths in this document are local state and Git-ignored. Operators must back
 up durable registries separately and must not manually delete active locks or
 staged packages. Third-party source is under `third_party/`, not `data/` or
-`runtime/`.
+`runtime/`. QuantGPT report output is similarly externalized with
+`QUANTGPT_REPORTS_DIR`; it must not be written into the pinned submodule.

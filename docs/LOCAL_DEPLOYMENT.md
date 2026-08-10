@@ -48,6 +48,36 @@ systemctl --user daemon-reload
 
 Starting or switching a service is intentionally a separate operator decision.
 
+## Immutable release layout
+
+For a long-lived production host, do not run services from a mutable development
+checkout. Use a versioned release directory and an atomic `current` symlink:
+
+```text
+~/fxalpha-deploy/
+  current -> releases/<git-commit>/
+  releases/<git-commit>/
+~/.config/fxalpha/
+  config.yaml
+  runtime.env
+~/fxalpha-state/
+  runtime/
+  quantgpt/
+```
+
+Templates in `deploy/systemd/release/` implement this layout. `runtime.env` is
+required and must define the absolute `FXALPHA_CONFIG_FILE`; copy
+`runtime.env.example`, replace `USER`, and set mode `0600`. The external config
+must set `paths.runtime_root` to `~/fxalpha-state/runtime` (expanded to an
+absolute path) and must map all durable data roots explicitly.
+
+Create a new release without changing the live symlink, build its `.venv`, run
+tests, then start shadow processes on QuantGPT `8004` and API `18082` with an
+independent runtime and copied SQLite state. Only after every lane is ready may
+the operator stop timers/services, atomically repoint `current`, install the
+release templates, and restart. Retain the previous release and unit files for
+rollback. Do not delete the old release during the cutover window.
+
 ## Configuration and state
 
 - Set `FXALPHA_CONFIG_FILE` to use config outside the checkout.

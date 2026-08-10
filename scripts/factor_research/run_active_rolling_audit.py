@@ -23,7 +23,12 @@ import yaml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-QUANTGPT_ROOT = PROJECT_ROOT / "external" / "quantgpt"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from storage.paths import CONFIG_FILE, QUANTGPT_CODE_ROOT, RUNTIME_ROOT  # noqa: E402
+
+QUANTGPT_ROOT = QUANTGPT_CODE_ROOT
 if str(QUANTGPT_ROOT) not in sys.path:
     sys.path.insert(0, str(QUANTGPT_ROOT))
 
@@ -45,7 +50,7 @@ class FactorRow:
 
 
 def _load_config() -> dict[str, Any]:
-    with (PROJECT_ROOT / "config.yaml").open("r", encoding="utf-8") as fh:
+    with CONFIG_FILE.open("r", encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
 
@@ -297,7 +302,7 @@ def _write_outputs(out_dir: Path, results: list[dict[str, Any]], config: dict[st
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=0, help="Limit number of active factors for smoke testing.")
-    parser.add_argument("--output-dir", default=str(PROJECT_ROOT / "runtime" / "diagnostics" / "factor_research" / "rolling_audit"))
+    parser.add_argument("--output-dir", default=str(RUNTIME_ROOT / "diagnostics" / "factor_research" / "rolling_audit"))
     args = parser.parse_args()
 
     cfg = _load_config()

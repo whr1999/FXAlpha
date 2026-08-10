@@ -24,10 +24,10 @@ import pandas as pd
 
 from domain.platform_evaluation import resolve_evaluation_profile
 from storage.factor_registry import FactorRegistry
-from storage.paths import PROJECT_ROOT, get_live_factor_research_config
+from storage.paths import RUNTIME_ROOT, get_live_factor_research_config
 
 
-RECERTIFICATION_ROOT = PROJECT_ROOT / "runtime" / "factor_research" / "library_recertification"
+RECERTIFICATION_ROOT = RUNTIME_ROOT / "factor_research" / "library_recertification"
 SCHEMA_VERSION = "factor_library_recertification_v1"
 POLICY_VERSION = "factor_library_lifecycle_advice_v1"
 

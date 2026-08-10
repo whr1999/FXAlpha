@@ -1,0 +1,18 @@
+[Unit]
+Description=FXAlpha release production multi-model Qlib paper fleet daily routine
+After=fxalpha-data-daily.service
+StartLimitIntervalSec=6h
+StartLimitBurst=4
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/fxalpha-deploy/current
+EnvironmentFile=%h/.config/fxalpha/runtime.env
+Environment=PYTHONPATH=%h/fxalpha-deploy/current
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/fxalpha-deploy/current/.venv/bin/python3 %h/fxalpha-deploy/current/cli.py paper-fleet-run
+TimeoutStartSec=3h
+KillMode=control-group
+Nice=5
+Restart=on-failure
+RestartSec=30min

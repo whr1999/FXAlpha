@@ -1,0 +1,19 @@
+[Unit]
+Description=FXAlpha release API and GUI on 127.0.0.1:18081
+After=network.target fxalpha-quantgpt-8003.service
+Wants=fxalpha-quantgpt-8003.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/fxalpha-deploy/current
+EnvironmentFile=%h/.config/fxalpha/runtime.env
+Environment=PYTHONPATH=%h/fxalpha-deploy/current
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/fxalpha-deploy/current/.venv/bin/python3 %h/fxalpha-deploy/current/scripts/start_fxalpha_api_18081.py
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=45
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=fxalpha-factor-stack.target

@@ -9,6 +9,7 @@
 > 如果要理解每个业务到底经过多少步、每一步怎样计算、什么分数才能入库或晋升，
 > 请读《[业务流程与计算逻辑说明书](docs/BUSINESS_WORKFLOWS.zh-CN.md)》。后者给出
 > 因子 Quick/Deep Score、Rolling、模型评分、风险控仓和 Qlib 成交的现行公式。
+> 生产值守、故障处理和回滚统一从《[生产运维入口](docs/OPERATIONS_INDEX.zh-CN.md)》开始。
 
 > **Alpha 阶段，仅用于研究和模拟交易。** 项目不提供投资建议，不保证因子或模型
 > 表现，也不包含可直接暴露公网的认证网关或实盘执行合约。
@@ -157,6 +158,7 @@ PYTHONPATH=. .venv/bin/python api_server.py --host 127.0.0.1 --port 18081
 ### 新用户
 
 - [完整使用指南](docs/USER_GUIDE.zh-CN.md)
+- [生产运维入口](docs/OPERATIONS_INDEX.zh-CN.md)
 - [业务流程与计算逻辑说明书](docs/BUSINESS_WORKFLOWS.zh-CN.md)
 - [系统界面说明](docs/SCREENSHOTS.zh-CN.md)
 - [本地部署](docs/LOCAL_DEPLOYMENT.md)

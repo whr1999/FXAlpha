@@ -11,6 +11,8 @@ records.
 > the platform. Use [Business Workflows and Calculation Logic](docs/BUSINESS_WORKFLOWS.md)
 > to understand every stage, calculation, score, import/promotion gate, risk
 > cap, and Qlib execution rule.
+> Production duty, incident handling, and rollback start from the
+> [Operations Index](docs/OPERATIONS_INDEX.md).
 
 > **Alpha-stage research and paper-trading software.** FXAlpha does not provide
 > investment advice, guarantee factor or model performance, or include a
@@ -183,6 +185,7 @@ tree and reachable Git history.
 ### New users
 
 - [Complete user guide](docs/USER_GUIDE.md)
+- [Production operations index](docs/OPERATIONS_INDEX.md)
 - [Business workflows and calculation logic](docs/BUSINESS_WORKFLOWS.md)
 - [System interface gallery](docs/SCREENSHOTS.md)
 - [Local deployment](docs/LOCAL_DEPLOYMENT.md)

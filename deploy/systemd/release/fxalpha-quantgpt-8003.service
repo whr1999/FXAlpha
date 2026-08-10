@@ -1,0 +1,18 @@
+[Unit]
+Description=FXAlpha release QuantGPT HTTP service on 127.0.0.1:8003
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/fxalpha-deploy/current/third_party/quantgpt
+EnvironmentFile=%h/.config/fxalpha/runtime.env
+Environment=PYTHONPATH=%h/fxalpha-deploy/current:%h/fxalpha-deploy/current/third_party/quantgpt
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/fxalpha-deploy/current/.venv/bin/python3 -m quantgpt --transport http --host 127.0.0.1 --port 8003
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=fxalpha-factor-stack.target

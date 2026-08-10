@@ -15,11 +15,11 @@ from urllib import error, request
 
 from domain.platform_ops.service_health import http_json_health
 from services._base import err_result, ok_result
-from storage.paths import LLM_API_KEY, PROJECT_ROOT, QUANTGPT_API_URL
+from storage.paths import LLM_API_KEY, PROJECT_ROOT, QUANTGPT_API_URL, RUNTIME_ROOT
 
 _PROCESS_STARTED_AT = time.time()
-_USAGE_STATUS_FILE = PROJECT_ROOT / "runtime" / "platform" / "runtime_usage_status.json"
-_CODEX_USAGE_SNAPSHOT_FILE = PROJECT_ROOT / "runtime" / "platform" / "codex_usage_snapshot.json"
+_USAGE_STATUS_FILE = RUNTIME_ROOT / "platform" / "runtime_usage_status.json"
+_CODEX_USAGE_SNAPSHOT_FILE = RUNTIME_ROOT / "platform" / "codex_usage_snapshot.json"
 _CODEX_HOME = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).expanduser()
 _CODEX_LOGS_DB = Path(
     os.environ.get("FXALPHA_CODEX_LOGS_DB", str(_CODEX_HOME / "logs_2.sqlite"))
@@ -27,10 +27,10 @@ _CODEX_LOGS_DB = Path(
 _CODEX_STATE_DB = Path(
     os.environ.get("FXALPHA_CODEX_STATE_DB", str(_CODEX_HOME / "state_5.sqlite"))
 ).expanduser()
-_DEEPSEEK_TRACE_FILE = PROJECT_ROOT / "runtime" / "factor_research" / "orchestrator_llm_traces" / "current.jsonl"
+_DEEPSEEK_TRACE_FILE = RUNTIME_ROOT / "factor_research" / "orchestrator_llm_traces" / "current.jsonl"
 _DEEPSEEK_TRACE_ROOT = _DEEPSEEK_TRACE_FILE.parent
-_DEEPSEEK_MODEL_TRACE_ROOT = PROJECT_ROOT / "runtime" / "model" / "orchestrator_traces"
-_DEEPSEEK_BALANCE_HISTORY_FILE = PROJECT_ROOT / "runtime" / "platform" / "deepseek_balance_history.json"
+_DEEPSEEK_MODEL_TRACE_ROOT = RUNTIME_ROOT / "model" / "orchestrator_traces"
+_DEEPSEEK_BALANCE_HISTORY_FILE = RUNTIME_ROOT / "platform" / "deepseek_balance_history.json"
 _DEEPSEEK_BALANCE_HISTORY_RETENTION = timedelta(days=8)
 _CODEX_TOKEN_TS_RE = re.compile(r'"timestamp":"([^"]+)"')
 _CODEX_TOKEN_TOTAL_RE = re.compile(r'"last_token_usage":\{.*?"total_tokens":(\d+)', re.ASCII)
@@ -43,7 +43,7 @@ _USAGE_CACHE: dict[str, Any] = {"computed_at": 0.0, "value": None, "warnings": [
 _TRACE_TAIL_BYTES = 16 * 1024 * 1024
 _TRACE_TAIL_MAX_LINES = 1200
 _AUTOMATION_CONTROL_LOCK = threading.Lock()
-_AUTOMATION_AUDIT_FILE = PROJECT_ROOT / "runtime" / "platform" / "automation_control_audit.jsonl"
+_AUTOMATION_AUDIT_FILE = RUNTIME_ROOT / "platform" / "automation_control_audit.jsonl"
 _AUTOMATION_WORKFLOWS = {
     "data_foundation": {
         "service_unit": "fxalpha-data-daily.service",

@@ -32,6 +32,8 @@ def test_config_example_and_external_override_contract():
     assert (ROOT / "config.example.yaml").is_file()
     assert "FXALPHA_CONFIG_FILE" in paths_source
     assert "CONFIG_EXAMPLE_FILE" in paths_source
+    assert 'PATHS.get("runtime_root"' in paths_source
+    assert "QLIB_SOURCE_ROOT" in paths_source
     assert not (ROOT / "config.yaml").exists()
 
 

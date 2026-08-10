@@ -10,11 +10,11 @@ from typing import Any
 
 import yaml
 
-from storage.paths import CONFIG_FILE, PROJECT_ROOT
+from storage.paths import CONFIG_FILE, RUNTIME_ROOT
 
 
 EVALUATION_MODES = ("research", "production")
-EVALUATION_STATE_FILE = PROJECT_ROOT / "runtime" / "platform" / "evaluation_mode.json"
+EVALUATION_STATE_FILE = RUNTIME_ROOT / "platform" / "evaluation_mode.json"
 
 
 class EvaluationProfileError(ValueError):

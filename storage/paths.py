@@ -43,6 +43,7 @@ LLM = CONFIG.get("llm", {})
 QUANT_RESEARCH_LLM = LLM.get("quant_research", {})
 
 DEFAULT_DATA_ROOT = PROJECT_ROOT / "data"
+DEFAULT_RUNTIME_ROOT = PROJECT_ROOT / "runtime"
 DEFAULT_THIRD_PARTY_ROOT = PROJECT_ROOT / "third_party"
 DEFAULT_DATA_FOUNDATION_SCRIPT_ROOT = PROJECT_ROOT / "scripts" / "data_foundation"
 DEFAULT_PRODUCTION_RAW_ROOT = DEFAULT_DATA_ROOT / "raw" / "tushare"
@@ -72,6 +73,21 @@ def _rooted_path(value: str | Path) -> Path:
     """Resolve configured relative paths against the repository, not the CWD."""
     path = Path(value).expanduser()
     return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+def _runtime_path(value: str | Path) -> Path:
+    """Resolve a runtime path against the configured runtime root.
+
+    Existing configurations commonly store values such as
+    ``runtime/model/latest_status.json``.  Strip that compatibility prefix so
+    the same configuration can be moved under an external ``runtime_root``.
+    """
+    path = Path(value).expanduser()
+    if path.is_absolute():
+        return path
+    if path.parts and path.parts[0] == "runtime":
+        path = Path(*path.parts[1:])
+    return RUNTIME_ROOT / path
 
 PRODUCTION_RAW_HDF5 = _rooted_path(
     PATHS.get(
@@ -155,20 +171,20 @@ QLIB_STOCK_META = QLIB_DATA_ROOT / "stock_converter_meta.json"
 QLIB_INDEX_META = QLIB_DATA_ROOT / "index_converter_meta.json"
 QLIB_CALENDAR_FILE = QLIB_DATA_ROOT / "calendars" / "day.txt"
 
-RUNTIME_ROOT = PROJECT_ROOT / "runtime"
+RUNTIME_ROOT = _rooted_path(PATHS.get("runtime_root", str(DEFAULT_RUNTIME_ROOT)))
 DATA_FOUNDATION_ROOT = RUNTIME_ROOT / "data_foundation"
-LATEST_STATUS_FILE = PROJECT_ROOT / DATA_FOUNDATION.get("latest_status_file", "runtime/data_foundation/latest_status.json")
-CURRENT_PRODUCTION_DATASET_FILE = PROJECT_ROOT / DATA_FOUNDATION.get(
+LATEST_STATUS_FILE = _runtime_path(DATA_FOUNDATION.get("latest_status_file", "runtime/data_foundation/latest_status.json"))
+CURRENT_PRODUCTION_DATASET_FILE = _runtime_path(DATA_FOUNDATION.get(
     "current_production_dataset_file",
     "runtime/data_foundation/CURRENT_PRODUCTION_DATASET.json",
-)
+))
 FACTOR_RESEARCH_ROOT = RUNTIME_ROOT / "factor_research"
 MODEL_RUNTIME_ROOT = RUNTIME_ROOT / "model"
 MODEL_RUNS_ROOT = MODEL_RUNTIME_ROOT / "runs"
-LATEST_MODEL_STATUS_FILE = PROJECT_ROOT / MODEL.get(
+LATEST_MODEL_STATUS_FILE = _runtime_path(MODEL.get(
     "latest_status_file",
     "runtime/model/latest_status.json",
-)
+))
 TRADING_RUNTIME_ROOT = RUNTIME_ROOT / 'trading'
 PREDICTION_RUNTIME_ROOT = TRADING_RUNTIME_ROOT / 'prediction'
 PREDICTION_FEATURE_RUNTIME_ROOT = TRADING_RUNTIME_ROOT / 'prediction_features'
@@ -186,11 +202,11 @@ TRADING_DATA_ROOT = _rooted_path(PATHS.get("trading_data_root", str(DEFAULT_DATA
 TRADING_EXECUTION_LOG_DB = _rooted_path(
     PATHS.get("trading_execution_log_db", str(TRADING_DATA_ROOT / "execution_log.db"))
 ).expanduser()
-ACTIVE_MODEL_FEATURE_SET_FILE = PROJECT_ROOT / MODEL.get(
+ACTIVE_MODEL_FEATURE_SET_FILE = _runtime_path(MODEL.get(
     "active_feature_set_file",
     "runtime/model/active_feature_set.json",
-)
-LATEST_PIPELINE_STATUS_FILE = PROJECT_ROOT / PIPELINE.get("latest_status_file", "runtime/pipeline/latest_status.json")
+))
+LATEST_PIPELINE_STATUS_FILE = _runtime_path(PIPELINE.get("latest_status_file", "runtime/pipeline/latest_status.json"))
 PIPELINE_DEFAULT_FACTOR_TARGET = int(PIPELINE.get("default_factor_target", 10))
 PIPELINE_DEFAULT_FACTOR_SESSIONS = int(PIPELINE.get("default_factor_sessions", 3))
 PIPELINE_DEFAULT_MODEL_FAMILY = str(PIPELINE.get("default_model_family", MODEL.get("default_family", "lgbm")))
