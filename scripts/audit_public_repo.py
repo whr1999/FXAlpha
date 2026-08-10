@@ -124,9 +124,9 @@ def audit() -> dict:
             for marker in FORBIDDEN_PERSONAL_PATHS:
                 if marker in text:
                     violations.append({"kind": "personal_absolute_path", "path": rel, "detail": marker})
-        for name, pattern in SECRET_PATTERNS.items():
+        for pattern in SECRET_PATTERNS.values():
             if pattern.search(text):
-                violations.append({"kind": f"secret_pattern:{name}", "path": rel})
+                violations.append({"kind": "secret_pattern_detected", "path": rel})
         for name, pattern in PRIVATE_RUNTIME_ID_PATTERNS.items():
             if pattern.search(text):
                 violations.append({"kind": f"private_runtime_identifier:{name}", "path": rel})
@@ -230,9 +230,6 @@ def audit() -> dict:
 
 def main() -> int:
     result = audit()
-    # Secret matches are reduced to rule names and repository-relative paths;
-    # matched credential text is never retained in or emitted by result.
-    # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0 if result["status"] == "passed" else 1
 

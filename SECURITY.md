@@ -57,3 +57,6 @@ branch is not an approved replacement for an FXAlpha integration pin.
   source address. Wildcard, loopback, link-local, multicast, reserved,
   broadcast, IPv6, and malformed source values are rejected before socket
   creation reaches the bind operation.
+- Secret-audit reports emit only a fixed finding category plus the affected
+  repository path and, for history checks, the Git object ID. Matched secret
+  text and the internal detector label are never included in console output.
