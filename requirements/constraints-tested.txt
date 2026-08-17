@@ -7,7 +7,7 @@ lightgbm==4.6.0
 mcp==1.28.1
 mlflow==3.11.1
 numpy==2.4.3
-openai==2.29.0
+openai==2.54.0
 pandas==2.3.3
 pyarrow==23.0.1
 PyYAML==6.0.3
